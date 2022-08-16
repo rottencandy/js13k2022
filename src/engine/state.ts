@@ -1,5 +1,5 @@
 type StateObject = {
-    [key: string]: (...args: any[]) => string
+    [key: string | number]: (...args: any[]) => string | number | void
 };
 
 /**
@@ -20,7 +20,7 @@ type StateObject = {
  * Any args will be passed on to state function.
  * `reset_`: reset state to given key.
  */
-export const createStateMachine = (states: StateObject, initial: string) => {
+export const createStateMachine = (states: StateObject, initial: string | number) => {
     let current = states[initial];
     return {
         run_: (...data: any[]) => {
@@ -30,8 +30,7 @@ export const createStateMachine = (states: StateObject, initial: string) => {
             } else if (next) {
                 current = states[next];
             }
-            return next;
         },
-        reset_: (state: string) => current = states[state],
+        reset_: (state: string | number) => current = states[state],
     };
 }
