@@ -2,10 +2,10 @@
 * */
 
 html, body {
-    padding: 0;
-    margin: 0;
     width: 100%;
     height: 100%;
+    padding: 0;
+    margin: 0;
     background: #111;
     font: 100 2.5rem Trebuchet,sans-serif;
     color: #333;
@@ -14,17 +14,17 @@ html, body {
 
 /* Container div */
 #a {
+    position: relative;
     width: 100%;
     height: 100%;
-    position: relative;
 }
 
 /* Canvas */
 #c {
+    position: absolute;
+    margin: auto;
     left: 0;
     right: 0;
-    margin: auto;
-    position: absolute;
 
     /* Pixelate instead of blurring */
     /*
@@ -37,13 +37,49 @@ html, body {
 
 #ui {
     position: absolute;
+    height: 100%;
+    width: 100%;
     background: grey;
+    display: flex;
+    flex-direction: column;
+    transition: opacity 1s;
 }
 
 /* Note for potrait devices */
 #d {
-    display: none;
     position: absolute;
+    display: none;
     bottom: 0;
     color: green;
 }
+
+/* Runtime created elements */
+#title {
+    margin: 3.5rem auto;
+}
+
+#start {
+    cursor: pointer;
+}
+#start:hover {
+    color: green;
+}
+
+/* Anim */
+.fadeo {
+    opacity: 0;
+}
+.fadei {
+    opacity: 1;
+}
+
+/*
+@keyframes fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+*/
