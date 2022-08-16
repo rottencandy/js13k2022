@@ -148,6 +148,11 @@ type TextureState = {
      * Binds texture automatically.
      */
     setImage_: (imgSrc: string) => TextureState;
+    /**
+     * Binds texture automatically.
+     * Use `setImage_` if loading image with strings.
+     */
+    setTexImage2D_: (imgSrc: TexImageSource) => TextureState;
     setFilter_: (type?: number) => TextureState;
     setWrap_: (type?: number) => TextureState;
     /**
@@ -180,14 +185,18 @@ const createTextureFns = (gl: WebGL2RenderingContext) => (target = GL_TEXTURE_2D
             setParam(GL_TEXTURE_WRAP_T, type);
             return thisObj;
         },
+        setTexImage2D_(src) {
+            thisObj.bind_();
+            gl.texImage2D(target, 0, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, src);
+            gl.generateMipmap(target);
+            return thisObj;
+        },
         // TODO: Turn this into async
         setImage_(imgSrc) {
             const img = new Image;
             img.src = imgSrc;
             img.onload = () => {
-                thisObj.bind_();
-                gl.texImage2D(target, 0, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, img);
-                gl.generateMipmap(target);
+                thisObj.setTexImage2D_(img);
             };
             return thisObj;
         },
