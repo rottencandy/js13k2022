@@ -3,7 +3,18 @@ const M = Math;
 export const DOC = document;
 
 /** Alias for `document.getElementById()` */
-export const getById = (id: string) => DOC.getElementById(id) as HTMLCanvasElement;
+export const getById = (id: string) => DOC.getElementById(id) as any;
+/** Create element with props */
+export const createEle = (name: string, props = {}, val?: any) => {
+    const ele = DOC.createElement(name);
+    for (let k in props) {
+        ele[k] = props[k];
+    }
+    ele.append(val);
+    return ele;
+};
+
+export const after = (time: number, fn: Function) => setTimeout(fn, time);
 
 export const
     deviceScaleRatio = (width: number, height: number) => MIN(innerWidth / width, innerHeight / height),
