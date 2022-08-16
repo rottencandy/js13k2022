@@ -64,12 +64,13 @@ const Camera = (fov: number, zNear: number, zFar: number, aspect: number): CamSt
     const t_target = V3create();
 
     const thisObj: CamState = {
+        // TODO: is Z supposed to be inverted?
         move_(x, y, z) {
             if (z) {
                 V3multiplySc(t_move, front, z);
                 // reset y dir, so we always move paralell to the ground
                 // regardless of face direction
-                t_move[1] = 0;
+                // t_move[1] = 0;
                 V3add(pos, pos, t_move);
             }
             if (y) {

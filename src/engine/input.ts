@@ -40,7 +40,7 @@ const ARROW = 'Arrow';
 /**
  * Initialize onkey listeners
 */
-export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, height: number, lockPointer?: boolean) => {
+export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, height: number) => {
     // TODO: use keycode here?
     const setKeyState = (value: boolean) => ({ key: code }) => {
         switch (code) {
@@ -93,13 +93,6 @@ export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, heigh
         }
     };
 
-    if (lockPointer) {
-        canvas.onclick = () => {
-            if (!Keys.pointerLocked_) {
-                canvas.requestPointerLock();
-            }
-        };
-    }
     DOC.addEventListener('pointerlockchange', () => {
         Keys.pointerLocked_ = DOC.pointerLockElement === canvas;
     });
