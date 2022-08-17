@@ -9,6 +9,14 @@ require('esbuild').build({
     format: 'iife',
     outdir: 'app',
     mangleProps: /_$/,
-    plugins: [glslPlugin({ minify: true, mangle: true })],
+    plugins: [glslPlugin({
+        minify: true,
+        mangle: true,
+        // NOTE: if using this, remember to use correct names when setting
+        //mangle_global_map: {
+        //    uMat: 'uM',
+        //    uPos: 'uP',
+        //},
+    })],
     loader: { '.png': 'dataurl' }
 }).catch(() => process.exit(1))

@@ -1,7 +1,6 @@
 const glslPlugin = require('esbuild-plugin-spglsl');
-const esbuild = require('esbuild');
 
-esbuild.serve({
+require('esbuild').serve({
     servedir: 'app',
 }, {
     entryPoints: ['src/main.ts', 'src/app.css'],
@@ -11,13 +10,10 @@ esbuild.serve({
     target: 'es6',
     format: 'iife',
     outdir: 'app',
-    //watch: {
-    //    onRebuild(error) {
-    //        if (error) console.error('Build failed:', error.errors)
-    //        else console.log('Build succeeded!')
-    //    },
-    //},
-    plugins: [glslPlugin({ minify: false, mangle: false })],
+    plugins: [glslPlugin({
+        minify: false,
+        mangle: false
+    })],
     loader: { '.png': 'dataurl' }
 })
     .then(server => console.log(`Serving at: http://localhost:${server.port}`))
