@@ -11,15 +11,17 @@
     "uglify-nomangle": "uglifyjs --compress --mangle -o app/main.js -- app/main.js",
     "uglify-debug": "uglifyjs --compress --mangle --mangle-props regex=/^.[^$]/,debug --name-cache uglify-cache.json -o app/main.js -- app/main.js",
     "roll": "roadroller app/main.js -o app/main.js",
+    "closure": "google-closure-compiler < app/main.js -O ADVANCED --js_output_file app/main.js",
     "inline": "html-inline app/index.html -o app/inline.html",
     "bundle": "./bundle.sh"
   },
   "devDependencies": {
-    "esbuild": "^0.15.3",
+    "esbuild": "^0.15.5",
     "esbuild-plugin-spglsl": "^0.0.3",
+    "google-closure-compiler": "^20220803.0.0",
     "html-inline": "^1.2.0",
     "roadroller": "^2.1.0",
     "spglsl": "^0.2.6",
-    "uglify-js": "^3.16.3"
+    "uglify-js": "^3.17.0"
   }
 }
