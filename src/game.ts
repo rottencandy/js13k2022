@@ -1,6 +1,6 @@
 import { CTX } from './globals';
 import { createStateMachine } from './engine/state';
-import { update as sceneUpdate, render as sceneRender, init } from './scene';
+import { update as sceneUpdate, render as sceneRender } from './scene';
 
 // ts enums are expensive
 const sPaused = 0;
@@ -22,7 +22,5 @@ export const render = () => {
     CTX.clear_();
     sceneRender();
 };
-
-init();
 
 export const startGame = () => sm.reset_(sPlaying);
