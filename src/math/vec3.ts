@@ -1,4 +1,4 @@
-import { F32, HYPOT, SQRT, SIN, COS } from '../globals';
+import { F32 } from '../globals';
 
 // source: https://github.com/toji/gl-matrix
 
@@ -17,7 +17,7 @@ export const V3set = (v: Vector, x: number, y: number, z: number) => {
 };
 
 export const V3length = (v: Vector) => {
-    return HYPOT(v[0], v[1], v[2]);
+    return Math.hypot(v[0], v[1], v[2]);
 }
 
 export const V3add = (out: Vector, a: Vector, b: Vector) => {
@@ -73,7 +73,7 @@ export const V3cross = (out: Vector, a: Vector, b: Vector) => {
 };
 
 export const V3normalize = (out: Vector, v: Vector) => {
-    const length = SQRT(V3dot(v, v));
+    const length = Math.sqrt(V3dot(v, v));
     // make sure we don't divide by 0.
     if (length > 0.00001) {
         out[0] = v[0] / length;
@@ -91,5 +91,5 @@ export const V3distance = (a: Vector, b: Vector) => {
     const x = b[0] - a[0];
     const y = b[1] - a[1];
     const z = b[2] - a[2];
-    return HYPOT(x, y, z);
+    return Math.hypot(x, y, z);
 }

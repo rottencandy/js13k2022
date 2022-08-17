@@ -1,4 +1,4 @@
-import { deviceScaleRatio, DOC } from '../globals';
+import { deviceScaleRatio } from '../globals';
 
 type WatchedKeys = {
     left_: boolean,
@@ -70,8 +70,8 @@ export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, heigh
         }
     }
 
-    onkeydown = setKeyState(!!1);
-    onkeyup = setKeyState(!!0);
+    window.onkeydown = setKeyState(!!1);
+    window.onkeyup = setKeyState(!!0);
 
     canvas.onpointerdown = () => Keys.clicked_ = !!1;
     canvas.onpointerup = () => Keys.clicked_ = !!0;
@@ -93,10 +93,10 @@ export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, heigh
         }
     };
 
-    DOC.addEventListener('pointerlockchange', () => {
-        Keys.pointerLocked_ = DOC.pointerLockElement === canvas;
+    document.addEventListener('pointerlockchange', () => {
+        Keys.pointerLocked_ = document.pointerLockElement === canvas;
     });
-    DOC.onmousemove = (e) => {
+    document.onmousemove = (e) => {
         Keys.ptrX_ = e.movementX;
         Keys.ptrY_ = e.movementY;
     };

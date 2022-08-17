@@ -37,7 +37,7 @@ import {
     GL_UNSIGNED_SHORT,
     GL_VERTEX_SHADER,
 } from './gl-constants';
-import { deviceScaleRatio, getById } from '../globals';
+import { deviceScaleRatio } from '../globals';
 import { setupKeyListener } from './input';
 
 const clearFn = (gl: WebGL2RenderingContext) => () => {
@@ -350,7 +350,7 @@ export const createGLContext = (canvas: HTMLCanvasElement, width = 400, height =
             canvas.style.height = height * ratio + 'px';
             gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
             // display note if device is in potrait
-            getById('d').style.display = innerWidth < innerHeight ? 'block' : 'none';
+            document.getElementById('d').style.display = window.innerWidth < window.innerHeight ? 'block' : 'none';
         },
         changeSize_(w, h) {
             width = w;

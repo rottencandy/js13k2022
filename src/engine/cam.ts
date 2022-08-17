@@ -1,4 +1,3 @@
-import { COS, PI, SIN } from '../globals';
 import {
     Matrix,
     M4lookAt,
@@ -41,7 +40,7 @@ type CamState = {
     projectionMatrix_: Matrix;
 };
 
-const MAX_PITCH = PI / 2 - 0.01;
+const MAX_PITCH = Math.PI / 2 - 0.01;
 /**
  * Create webgl camera
  */
@@ -53,7 +52,7 @@ const Camera = (fov: number, zNear: number, zFar: number, aspect: number): CamSt
     const up = V3create(0, 1);
     const front = V3create(0, 0, -1);
     // make cam initially point to z=-1
-    let yaw = -PI / 2,
+    let yaw = -Math.PI / 2,
         pitch = 0;
 
     // temporary cached variables
@@ -93,10 +92,10 @@ const Camera = (fov: number, zNear: number, zFar: number, aspect: number): CamSt
             if (pitch < -MAX_PITCH)
                 pitch = -MAX_PITCH;
 
-            const cosPitch = COS(pitch);
-            t_dir[0] = COS(yaw) * cosPitch;
-            t_dir[1] = SIN(pitch);
-            t_dir[2] = SIN(yaw) * cosPitch;
+            const cosPitch = Math.cos(pitch);
+            t_dir[0] = Math.cos(yaw) * cosPitch;
+            t_dir[1] = Math.sin(pitch);
+            t_dir[2] = Math.sin(yaw) * cosPitch;
             V3normalize(front, t_dir);
             return thisObj;
         },

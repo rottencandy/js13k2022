@@ -1,4 +1,4 @@
-import { F32, SIN, COS, TAN, ABS, HYPOT } from '../globals';
+import { F32 } from '../globals';
 import { Vector } from './vec3';
 
 // source: https://github.com/toji/gl-matrix
@@ -312,8 +312,8 @@ export const M4scale = (out: Matrix, a: Matrix, v: Vector) => {
 };
 
 export const M4rotateX = (out: Matrix, a: Matrix, rad: number) => {
-    const s = SIN(rad);
-    const c = COS(rad);
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
     const a10 = a[4];
     const a11 = a[5];
     const a12 = a[6];
@@ -348,8 +348,8 @@ export const M4rotateX = (out: Matrix, a: Matrix, rad: number) => {
 };
 
 export const M4rotateY = (out: Matrix, a: Matrix, rad: number) => {
-    const s = SIN(rad);
-    const c = COS(rad);
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
     const a00 = a[0];
     const a01 = a[1];
     const a02 = a[2];
@@ -384,8 +384,8 @@ export const M4rotateY = (out: Matrix, a: Matrix, rad: number) => {
 };
 
 export const M4rotateZ = (out: Matrix, a: Matrix, rad: number) => {
-    const s = SIN(rad);
-    const c = COS(rad);
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
     const a00 = a[0];
     const a01 = a[1];
     const a02 = a[2];
@@ -420,7 +420,7 @@ export const M4rotateZ = (out: Matrix, a: Matrix, rad: number) => {
 };
 
 export const M4perspective = (out: Matrix, fov: number, aspect: number, near: number, far: number) => {
-    const f = 1.0 / TAN(fov / 2);
+    const f = 1.0 / Math.tan(fov / 2);
     out[0] = f / aspect;
     out[1] = 0;
     out[2] = 0;
@@ -454,9 +454,9 @@ export const M4lookAt = (out: Matrix, eye: Vector, center: Vector, up: Vector) =
     let centerz = center[2];
 
     if (
-        ABS(eyex - centerx) < EPSILON &&
-        ABS(eyey - centery) < EPSILON &&
-        ABS(eyez - centerz) < EPSILON
+        Math.abs(eyex - centerx) < EPSILON &&
+        Math.abs(eyey - centery) < EPSILON &&
+        Math.abs(eyez - centerz) < EPSILON
     ) {
         return M4identity(out);
     }
@@ -465,7 +465,7 @@ export const M4lookAt = (out: Matrix, eye: Vector, center: Vector, up: Vector) =
     z1 = eyey - centery;
     z2 = eyez - centerz;
 
-    len = 1 / HYPOT(z0, z1, z2);
+    len = 1 / Math.hypot(z0, z1, z2);
     z0 *= len;
     z1 *= len;
     z2 *= len;
@@ -473,7 +473,7 @@ export const M4lookAt = (out: Matrix, eye: Vector, center: Vector, up: Vector) =
     x0 = upy * z2 - upz * z1;
     x1 = upz * z0 - upx * z2;
     x2 = upx * z1 - upy * z0;
-    len = HYPOT(x0, x1, x2);
+    len = Math.hypot(x0, x1, x2);
     if (!len) {
         x0 = 0;
         x1 = 0;
@@ -489,7 +489,7 @@ export const M4lookAt = (out: Matrix, eye: Vector, center: Vector, up: Vector) =
     y1 = z2 * x0 - z0 * x2;
     y2 = z0 * x1 - z1 * x0;
 
-    len = HYPOT(y0, y1, y2);
+    len = Math.hypot(y0, y1, y2);
     if (!len) {
         y0 = 0;
         y1 = 0;

@@ -1,18 +1,18 @@
 import { startGame } from './game';
-import { after, createEle, getById } from './globals';
+import { createEle } from './globals';
 
-const root: HTMLDivElement = getById('ui');
+const root = document.getElementById('ui') as HTMLDivElement;
 
 const clearRoot = () => root.innerHTML = '';
 
 export const showUI = () => {
     root.className = 'fadei';
-    after(1000, () => root.style.display = 'block');
+    setTimeout(() => root.style.display = 'block', 1000);
 }
 
 export const hideUI = () => {
     root.className = 'fadeo';
-    after(1000, () => root.style.display = 'none');
+    setTimeout(() => root.style.display = 'none', 1000);
 }
 
 export const showTitle = () => {

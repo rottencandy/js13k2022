@@ -1,5 +1,3 @@
-import { MIN } from '../globals';
-
 type StepFn = (delta: number) => void;
 
 /**
@@ -13,7 +11,7 @@ export const startLoop = (update: StepFn, render: StepFn) => {
     (function loop(now: number) {
         // Sanity check - absorb random lag spike / frame jumps
         // (expected delta for 60FPS is 1000/60 = ~16.67ms)
-        dt += MIN(now - last, 1e3);
+        dt += Math.min(now - last, 1e3);
         last = now;
 
         // don't update with a very large dt
