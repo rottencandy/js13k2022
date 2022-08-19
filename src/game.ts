@@ -2,17 +2,18 @@ import { CTX } from './globals';
 import { createStateMachine } from './engine/state';
 import { update as sceneUpdate, render as sceneRender } from './scene';
 
-// ts enums are expensive
-const sPaused = 0;
-const sPlaying = 1;
+const enum State {
+    Paused,
+    Playing,
+};
 
 const sm = createStateMachine({
-    [sPaused]: () => {
+    [State.Paused]: () => {
     },
-    [sPlaying]: (dt: number) => {
+    [State.Playing]: (dt: number) => {
         sceneUpdate(dt);
     }
-}, sPaused);
+}, State.Paused);
 
 export const update = (dt: number) => {
     sm.run_(dt);
@@ -23,4 +24,4 @@ export const render = () => {
     sceneRender();
 };
 
-export const startGame = () => sm.reset_(sPlaying);
+export const startGame = () => sm.reset_(State.Playing);
