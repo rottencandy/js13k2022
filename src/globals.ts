@@ -21,4 +21,4 @@ export const
 export const CTX = createGLContext(document.getElementById('c') as HTMLCanvasElement, 640, 360);
 (window.onresize = CTX.resize_)();
 
-export const CAM = Camera(radians(45), 1, 400, 640/360).move_(0,0,-10).recalculate_();
+export const CAM = Camera(radians(45), 1, 400, 640/360).move_(0,0,20).recalculate_();
