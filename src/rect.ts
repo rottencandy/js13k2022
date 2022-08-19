@@ -38,12 +38,12 @@ export const createRectTex = (tex: any) => {
     };
 };
 
-export const createShadedRect = (frag: string, size = 1) => {
+export const createShadedRect = (frag: string, width = 1, height = width) => {
     const sh = CTX.shader_(rectVert, frag);
     sh.use_();
     const uni = sh.uniform_;
     uni`uMat`.m4fv_(CAM.matrix_);
-    uni`uSize`.u1f_(size);
+    uni`uSize`.u2f_(width, height);
 
     return {
         use_() {

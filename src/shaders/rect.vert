@@ -4,7 +4,7 @@ precision mediump float;
 layout(location=0)in vec4 aPos;
 
 uniform mat4 uMat;
-uniform float uSize;
+uniform vec2 uSize;
 uniform vec3 uPos;
 
 out vec2 vUV;
