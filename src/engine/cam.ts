@@ -65,7 +65,7 @@ const Camera = (fov: number, zNear: number, zFar: number, aspect: number): CamSt
     const thisObj: CamState = {
         move_(x, y, z) {
             if (z) {
-                V3multiplySc(t_move, front, -z);
+                V3multiplySc(t_move, front, z);
                 // reset y dir, so we always move paralell to the ground
                 // regardless of face direction
                 // t_move[1] = 0;
