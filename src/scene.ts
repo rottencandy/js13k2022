@@ -1,16 +1,15 @@
-import { createRectTex, createShadedRect } from './rect';
+import { createRectTex } from './rect';
 import { makeTextTex } from './text';
-import rectFrag from './shaders/rect.frag';
+import { update as panelUpdate, render as panelRender } from './entities/panel';
 
 let obj1 = createRectTex(makeTextTex('😭', 120));
-let obj2 = createShadedRect(rectFrag, 2);
 
 export const update = (dt: number) => {
+    panelUpdate(dt);
 };
 
 export const render = () => {
+    panelRender();
     obj1.use_();
-    obj1.draw_(0,0,0);
-    obj2.use_();
-    obj2.draw_(2,0,0);
+    obj1.draw_(3,0,0);
 };

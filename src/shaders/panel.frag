@@ -8,5 +8,5 @@ uniform sampler2D uTex;
 out vec4 outColor;
 
 void main() {
-    outColor = vec4(vUV, 0., 1.);
+    outColor = vec4(.0, .2, .7, 1.);
 }
