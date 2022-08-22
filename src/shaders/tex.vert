@@ -10,6 +10,7 @@ out vec2 vTex;
 
 void main() {
     gl_Position = uMat * (aPos + vec4(uPos, 0.));
-    // flip coordinates
-    vTex = 1. - aPos.xy;
+    vTex = aPos.xy;
+    // flip y coordinate
+    vTex.y = 1. - vTex.y;
 }
