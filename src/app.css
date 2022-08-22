@@ -39,10 +39,10 @@ html, body {
     position: absolute;
     height: 100%;
     width: 100%;
-    background: grey;
     display: flex;
     flex-direction: column;
     transition: opacity 1s;
+    backdrop-filter: blur(1rem);
 }
 
 /* Note for potrait devices */
