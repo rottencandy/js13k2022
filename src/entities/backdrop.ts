@@ -5,5 +5,5 @@ let obj = createShadedRect(rectFrag, 16, 10);
 
 export const render = () => {
     obj.use_();
-    obj.draw_(-1,-1,0);
+    obj.draw_(-3,-1,0);
 };

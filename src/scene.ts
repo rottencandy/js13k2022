@@ -13,5 +13,5 @@ export const render = () => {
     bgRender();
     panelRender();
     obj1.use_();
-    obj1.draw_(3,0,0);
+    obj1.draw_(0,0,0);
 };
