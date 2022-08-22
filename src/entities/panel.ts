@@ -8,5 +8,5 @@ export const update = (dt: number) => {
 
 export const render = () => {
     obj.use_();
-    obj.draw_(0,0,0);
+    obj.draw_(0,0,.1);
 };
