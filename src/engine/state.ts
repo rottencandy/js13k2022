@@ -1,5 +1,7 @@
+type StateFn = (...args: any[]) => string | number | StateFn | undefined;
+
 type StateObject = {
-    [key: string | number]: (...args: any[]) => string | number | void
+    [key: string | number]: StateFn
 };
 
 /**
@@ -27,7 +29,7 @@ export const createStateMachine = (states: StateObject, initial: string | number
             const next = current(...data);
             if (typeof next === 'function') {
                 current = next;
-            } else if (next) {
+            } else if (next !== undefined) {
                 current = states[next];
             }
         },
