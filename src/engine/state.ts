@@ -18,14 +18,14 @@ type StateObject = {
  *   MOVE: () => {}
  * });
  *
- * @returns `run_`: Step function, returns last run state.
+ * @returns `run`: Step function, returns last run state.
  * Any args will be passed on to state function.
- * `reset_`: reset state to given key.
+ * `reset`: reset state to given key.
  */
 export const createStateMachine = (states: StateObject, initial: string | number) => {
     let current = states[initial];
     return {
-        run_: (...data: any[]) => {
+        run: (...data: any[]) => {
             const next = current(...data);
             if (typeof next === 'function') {
                 current = next;
@@ -33,6 +33,6 @@ export const createStateMachine = (states: StateObject, initial: string | number
                 current = states[next];
             }
         },
-        reset_: (state: string | number) => current = states[state],
+        reset: (state: string | number) => current = states[state],
     };
 }

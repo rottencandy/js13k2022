@@ -9,14 +9,16 @@ const enum State {
 
 const sm = createStateMachine({
     [State.Paused]: () => {
+        return undefined;
     },
     [State.Playing]: (dt: number) => {
         sceneUpdate(dt);
+        return undefined;
     }
 }, State.Paused);
 
 export const update = (dt: number) => {
-    sm.run_(dt);
+    sm.run(dt);
 };
 
 export const render = () => {
@@ -24,4 +26,4 @@ export const render = () => {
     sceneRender();
 };
 
-export const startGame = () => sm.reset_(State.Playing);
+export const startGame = () => sm.reset(State.Playing);
