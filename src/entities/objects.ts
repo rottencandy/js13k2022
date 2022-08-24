@@ -3,36 +3,40 @@ import { createTween, ticker } from '../engine/interpolation';
 import { createRectTex } from '../rect';
 import { makeTextTex } from '../text';
 
-type Obj = {
-    x: number;
-    y: number;
-    next: Direction;
-};
-
 const enum Direction {
     Top,
     Rgt,
     Btm,
     Lft,
+    Non,
+};
+
+const enum Type {
+    Face1,
+    Face2,
+};
+
+type ObjGroup = {
+    x: number;
+    y: number;
+    grid: number[][];
+    next: Direction;
+    type: Type;
 };
 
 //const WIDTH = 8;
 //const HEIGHT = 8;
 
-const OBJECTS: Obj[] = [];
+const ObjGroups: ObjGroup[] = [];
 
-export const spawnObject = (x: number, y: number) => {
-    OBJECTS.push({ x, y, next: Direction.Top });
-};
+const objCtx = createRectTex(makeTextTex('🥳', 120));
+const waitTicker = ticker(900);
+const moveTween = createTween(0, 1, 900);
 
-let objCtx = createRectTex(makeTextTex('🥳', 120));
-
-const draw = (o: Obj) => {
-    objCtx.draw_(o.x, o.y, 0);
-};
-
-const updatePos = (o: Obj) => {
+const updatePos = (o: ObjGroup) => {
     switch (o.next) {
+        case Direction.Non:
+            break;
         case Direction.Top:
             o.y ++;
             break;
@@ -47,32 +51,49 @@ const updatePos = (o: Obj) => {
     }
 };
 
-const drawLerped = (o: Obj) => {
-    let x = o.x, y = o.y;
-    // origin is bottom left
-    switch (o.next) {
+const spawnObjectGroup = (x: number, y: number) =>
+    ObjGroups.push({ x, y, grid: [[0]], next: Direction.Top, type: Type.Face1 });
+
+const setupTypeCtx = (t: Type) => {
+    switch(t) {
+        case Type.Face1:
+        case Type.Face2:
+            objCtx.use_()
+            break;
+    }
+}
+
+const drawLerpedGroup = (grp: ObjGroup) => {
+    let baseX = grp.x, baseY = grp.y;
+    switch (grp.next) {
+        case Direction.Non:
+            break;
         case Direction.Top:
-            y += moveTween.val;
+            // this works out when moveTween isn't active
+            // because tweens are reset to 0 when done
+            baseY += moveTween.val;
             break;
         case Direction.Rgt:
-            x += moveTween.val;
+            baseX += moveTween.val;
             break;
         case Direction.Btm:
-            y -= moveTween.val;
+            baseY -= moveTween.val;
             break;
         case Direction.Lft:
-            x -= moveTween.val;
+            baseX -= moveTween.val;
     }
-    objCtx.draw_(x, y, 0);
+    setupTypeCtx(grp.type);
+    grp.grid.map(
+        (row, i) => row.map(
+            (_, j) => objCtx.draw_(baseX + j + 1, baseY + i + 1, 0)
+        )
+    );
 };
 
 const enum State {
     Idle,
     Moving,
 };
-
-const waitTicker = ticker(900);
-const moveTween = createTween(0, 1, 900);
 
 const sm = createStateMachine({
     [State.Idle]: (dt) => {
@@ -84,19 +105,18 @@ const sm = createStateMachine({
         moveTween.step(dt);
         if (moveTween.done) {
             moveTween.reset();
-            OBJECTS.map(updatePos);
+            ObjGroups.map(updatePos);
             return State.Idle;
         };
     },
 }, State.Idle);
 
-spawnObject(0, 0);
+spawnObjectGroup(0, 0);
 
 export const update = (dt: number) => {
     sm.run(dt);
 };
 
 export const render = () => {
-    objCtx.use_()
-    OBJECTS.map(moveTween.done ? draw : drawLerped);
+    ObjGroups.map(drawLerpedGroup);
 };
