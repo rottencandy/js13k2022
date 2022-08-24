@@ -3,6 +3,8 @@ import { createTween, ticker } from '../engine/interpolation';
 import { createRectTex } from '../rect';
 import { makeTextTex } from '../text';
 
+// Types {{{
+
 const enum Direction {
     Top,
     Rgt,
@@ -24,14 +26,17 @@ type ObjGroup = {
     type: Type;
 };
 
+// }}}
+
 //const WIDTH = 8;
 //const HEIGHT = 8;
 
 const ObjGroups: ObjGroup[] = [];
+const moveTween = createTween(0, 1, 900);
+
+// Render {{{
 
 const objCtx = createRectTex(makeTextTex('🥳', 120));
-const waitTicker = ticker(900);
-const moveTween = createTween(0, 1, 900);
 
 const updatePos = (o: ObjGroup) => {
     switch (o.next) {
@@ -90,6 +95,12 @@ const drawLerpedGroup = (grp: ObjGroup) => {
     );
 };
 
+// }}}
+
+// Update {{{
+
+const waitTicker = ticker(900);
+
 const enum State {
     Idle,
     Moving,
@@ -111,6 +122,8 @@ const sm = createStateMachine({
     },
 }, State.Idle);
 
+// }}}
+
 spawnObjectGroup(0, 0);
 
 export const update = (dt: number) => {
@@ -120,3 +133,5 @@ export const update = (dt: number) => {
 export const render = () => {
     ObjGroups.map(drawLerpedGroup);
 };
+
+// vim: fdm=marker:fdl=0:
