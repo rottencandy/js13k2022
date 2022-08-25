@@ -14,14 +14,19 @@ const enum Direction {
 };
 
 const enum Type {
-    Face1,
-    Face2,
+    FrozenFace,
+    Face,
 };
+
+const enum Opt {
+    None,
+    Some,
+}
 
 type ObjGroup = {
     x: number;
     y: number;
-    grid: number[][];
+    grid: Opt[][];
     next: Direction;
     type: Type;
 };
@@ -56,13 +61,9 @@ const updatePos = (o: ObjGroup) => {
     }
 };
 
-const spawnObjectGroup = (x: number, y: number) =>
-    ObjGroups.push({ x, y, grid: [[0]], next: Direction.Top, type: Type.Face1 });
-
 const setupTypeCtx = (t: Type) => {
     switch(t) {
-        case Type.Face1:
-        case Type.Face2:
+        case Type.Face:
             objCtx.use_()
             break;
     }
@@ -105,6 +106,9 @@ const enum State {
     Idle,
     Moving,
 };
+
+const spawnObjectGroup = (x: number, y: number, next = Direction.Non, type = Type.Face): ObjGroup =>
+    ({ x, y, grid: [[Opt.Some]], next, type });
 
 const sm = createStateMachine({
     [State.Idle]: (dt) => {
