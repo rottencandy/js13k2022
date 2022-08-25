@@ -91,7 +91,7 @@ const drawLerpedGroup = (grp: ObjGroup) => {
     setupTypeCtx(grp.type);
     grp.grid.map(
         (row, i) => row.map(
-            (_, j) => objCtx.draw_(baseX + j + 1, baseY + i + 1, 0)
+            (t, j) => t && objCtx.draw_(baseX + j + 1, baseY + i + 1, 0)
         )
     );
 };
