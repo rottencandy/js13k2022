@@ -107,8 +107,79 @@ const enum State {
     Moving,
 };
 
+// assuming groups are safely touching, not overlapping,  and share same type
+const mergeGroups = (groups: ObjGroup[]): ObjGroup => {
+    // leftmost group
+    const finalX = groups.sort((g1, g2) => g1.x - g2.x)[0].x;
+    // topmost group
+    const finalY = groups.sort((g1, g2) => g1.y - g2.y)[0].y;
+    const finalGrid = [];
+    groups.map(g => {
+        const xOff = g.x - finalX;
+        const yOff = g.y - finalY;
+        g.grid.map((row, i) => row.map((o, j) => {
+            const xPos = xOff + j;
+            const yPos = yOff + i;
+            (finalGrid[yPos] = finalGrid[yPos] || [])[xPos] = o;
+        }))
+    });
+    return {
+        x: finalX,
+        y: finalY,
+        grid: finalGrid,
+        type: groups[0].type,
+        next: Direction.Non,
+    };
+};
+
 const spawnObjectGroup = (x: number, y: number, next = Direction.Non, type = Type.Face): ObjGroup =>
     ({ x, y, grid: [[Opt.Some]], next, type });
+
+const isGroupNotEmpty = (g: ObjGroup) => g.grid.length > 0 && g.grid[0].length > 0;
+
+// assuming x,y is inside group, does nothing if element at pos is empty
+const splitGroup = (group: ObjGroup, x: number, y: number, newType = Type.Face) => {
+    const relX = x - group.x;
+    const relY = y - group.y;
+    if (!group.grid[relY][relX]) {
+        return [group];
+    }
+    group.grid[relY][relX] = Opt.None;
+    const newGrp = spawnObjectGroup(x, y, Direction.Non, newType);
+    const newGroups = [newGrp];
+    // empty col, needs to be split along Y axis
+    if (group.grid.every(row => !row[relX])) {
+        const extraGroup = {
+            x: x+1,
+            y: group.y,
+            next: group.next,
+            type: group.type,
+            grid: group.grid.map(row => row.slice(relX+1)),
+        };
+        if (isGroupNotEmpty(extraGroup)) {
+            newGroups.push(extraGroup);
+        }
+        group.grid.map(row => row.length = relX);
+    }
+    // empty row, needs to be split along X axis
+    if (group.grid[relY].every(o => !o)) {
+        const extraGroup = {
+            x: group.x,
+            y: y+1,
+            next: group.next,
+            type: group.type,
+            grid: group.grid.slice(relY+1),
+        };
+        if (isGroupNotEmpty(extraGroup)) {
+            newGroups.push(extraGroup);
+        }
+        group.grid.length = relY;
+    }
+    if (isGroupNotEmpty(group)) {
+        newGroups.push(group);
+    }
+    return newGroups;
+}
 
 const sm = createStateMachine({
     [State.Idle]: (dt) => {
