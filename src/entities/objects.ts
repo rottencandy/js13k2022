@@ -199,7 +199,53 @@ const sm = createStateMachine({
 
 // }}}
 
-spawnObjectGroup(0, 0);
+// so called "tests" {{{
+
+ObjGroups.push(spawnObjectGroup(0, 0, Direction.Top));
+ObjGroups.push(spawnObjectGroup(1, 1, Direction.Rgt));
+console.log(mergeGroups([spawnObjectGroup(0, 0), spawnObjectGroup(0, 1)]));
+console.log(splitGroup(
+    {
+        grid: [
+            [1,1,1],
+            [1,1,1],
+            [1,1,1],
+        ],
+        x: 1, y: 1, type: Type.Face, next: Direction.Non,
+    },
+    2, 2));
+console.log(splitGroup(
+    {
+        grid: [
+            [1,1,1],
+            [1,0,1],
+            [1,0,1],
+        ],
+        x: 1, y: 1, type: Type.Face, next: Direction.Non,
+    },
+    2, 1));
+console.log(splitGroup(
+    {
+        grid: [
+            [1,1,1],
+            [1,0,0],
+            [1,1,1],
+        ],
+        x: 1, y: 1, type: Type.Face, next: Direction.Non,
+    },
+    1, 2));
+console.log(splitGroup(
+    {
+        grid: [
+            [1,1,1],
+            [0,1,1],
+            [0,1,1],
+        ],
+        x: 1, y: 1, type: Type.Face, next: Direction.Non,
+    },
+    1, 1));
+
+// }}}
 
 export const update = (dt: number) => {
     sm.run(dt);
