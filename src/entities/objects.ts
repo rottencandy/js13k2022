@@ -43,31 +43,13 @@ const moveTween = createTween(0, 1, 900);
 
 const objCtx = createRectTex(makeTextTex('🥳', 120));
 
-const updatePos = (o: ObjGroup) => {
-    switch (o.next) {
-        case Direction.Non:
-            break;
-        case Direction.Top:
-            o.y ++;
-            break;
-        case Direction.Rgt:
-            o.x ++;
-            break;
-        case Direction.Btm:
-            o.y --;
-            break;
-        case Direction.Lft:
-            o.x --;
-    }
-};
-
 const setupTypeCtx = (t: Type) => {
-    switch(t) {
+    switch (t) {
         case Type.Face:
             objCtx.use_()
             break;
     }
-}
+};
 
 const drawLerpedGroup = (grp: ObjGroup) => {
     let baseX = grp.x, baseY = grp.y;
@@ -107,7 +89,7 @@ const enum State {
     Moving,
 };
 
-// assuming groups are safely touching, not overlapping,  and share same type
+/* assuming groups are safely touching, not overlapping,  and share same type */
 const mergeGroups = (groups: ObjGroup[]): ObjGroup => {
     // leftmost group
     const finalX = groups.sort((g1, g2) => g1.x - g2.x)[0].x;
@@ -137,7 +119,7 @@ const spawnObjectGroup = (x: number, y: number, next = Direction.Non, type = Typ
 
 const isGroupNotEmpty = (g: ObjGroup) => g.grid.length > 0 && g.grid[0].length > 0;
 
-// assuming x,y is inside group, does nothing if element at pos is empty
+/* assuming x,y is inside group, does nothing if element at pos is empty */
 const splitGroup = (group: ObjGroup, x: number, y: number, newType = Type.Face) => {
     const relX = x - group.x;
     const relY = y - group.y;
@@ -150,11 +132,11 @@ const splitGroup = (group: ObjGroup, x: number, y: number, newType = Type.Face) 
     // empty col, needs to be split along Y axis
     if (group.grid.every(row => !row[relX])) {
         const extraGroup = {
-            x: x+1,
+            x: x + 1,
             y: group.y,
             next: group.next,
             type: group.type,
-            grid: group.grid.map(row => row.slice(relX+1)),
+            grid: group.grid.map(row => row.slice(relX + 1)),
         };
         if (isGroupNotEmpty(extraGroup)) {
             newGroups.push(extraGroup);
@@ -165,10 +147,10 @@ const splitGroup = (group: ObjGroup, x: number, y: number, newType = Type.Face) 
     if (group.grid[relY].every(o => !o)) {
         const extraGroup = {
             x: group.x,
-            y: y+1,
+            y: y + 1,
             next: group.next,
             type: group.type,
-            grid: group.grid.slice(relY+1),
+            grid: group.grid.slice(relY + 1),
         };
         if (isGroupNotEmpty(extraGroup)) {
             newGroups.push(extraGroup);
@@ -179,7 +161,28 @@ const splitGroup = (group: ObjGroup, x: number, y: number, newType = Type.Face) 
         newGroups.push(group);
     }
     return newGroups;
-}
+};
+
+/* Also resets next dirs */
+const updatePos = (o: ObjGroup) => {
+    switch (o.intent) {
+        case Direction.Non:
+            break;
+        case Direction.Top:
+            o.y++;
+            break;
+        case Direction.Rgt:
+            o.x++;
+            break;
+        case Direction.Btm:
+            o.y--;
+            break;
+        case Direction.Lft:
+            o.x--;
+    }
+    o.next = Direction.Non;
+    o.intent = Direction.Non;
+};
 
 const sm = createStateMachine({
     [State.Idle]: (dt) => {
@@ -207,9 +210,9 @@ console.log(mergeGroups([spawnObjectGroup(0, 0), spawnObjectGroup(0, 1)]));
 console.log(splitGroup(
     {
         grid: [
-            [1,1,1],
-            [1,1,1],
-            [1,1,1],
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1],
         ],
         x: 1, y: 1, type: Type.Face, next: Direction.Non,
     },
@@ -217,9 +220,9 @@ console.log(splitGroup(
 console.log(splitGroup(
     {
         grid: [
-            [1,1,1],
-            [1,0,1],
-            [1,0,1],
+            [1, 1, 1],
+            [1, 0, 1],
+            [1, 0, 1],
         ],
         x: 1, y: 1, type: Type.Face, next: Direction.Non,
     },
@@ -227,9 +230,9 @@ console.log(splitGroup(
 console.log(splitGroup(
     {
         grid: [
-            [1,1,1],
-            [1,0,0],
-            [1,1,1],
+            [1, 1, 1],
+            [1, 0, 0],
+            [1, 1, 1],
         ],
         x: 1, y: 1, type: Type.Face, next: Direction.Non,
     },
@@ -237,9 +240,9 @@ console.log(splitGroup(
 console.log(splitGroup(
     {
         grid: [
-            [1,1,1],
-            [0,1,1],
-            [0,1,1],
+            [1, 1, 1],
+            [0, 1, 1],
+            [0, 1, 1],
         ],
         x: 1, y: 1, type: Type.Face, next: Direction.Non,
     },
