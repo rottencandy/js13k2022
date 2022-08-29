@@ -6,11 +6,11 @@ import { makeTextTex } from '../text';
 // Types {{{
 
 const enum Direction {
-    Top,
-    Rgt,
-    Btm,
-    Lft,
-    Non,
+    Top = 0,
+    Rgt = 1,
+    Btm = 2,
+    Lft = 3,
+    Non = 4,
 };
 
 const enum Type {
