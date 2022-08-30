@@ -34,14 +34,6 @@ type ObjGroup = {
     type: Type;
 };
 
-type Range = {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    strip: Opt[];
-};
-
 // }}}
 
 //const WIDTH = 8;
@@ -129,7 +121,10 @@ const mergeGroups = (groups: ObjGroup[]): ObjGroup => {
 const spawnObjectGroup = (x: number, y: number, intent = Direction.Non, type = Type.Face): ObjGroup =>
     ({ x, y, grid: [[Opt.Some]], intent, next: Direction.Non, type });
 
-const isGroupNotEmpty = (g: ObjGroup) => g.grid.length > 0 && g.grid[0].length > 0;
+const gWidth = (o: ObjGroup) => o.grid[0].length;
+const gHeight = (o: ObjGroup) => o.grid.length;
+
+const isGroupNotEmpty = (g: ObjGroup) => gWidth(g) > 0 && gHeight(g) > 0;
 
 /* assuming x,y is inside group, does nothing if element at pos is empty */
 const splitGroup = (group: ObjGroup, x: number, y: number, newType = Type.Face) => {
@@ -175,6 +170,51 @@ const splitGroup = (group: ObjGroup, x: number, y: number, newType = Type.Face) 
         newGroups.push(group);
     }
     return newGroups;
+};
+
+const getNextGroupPos = (o: ObjGroup, dir: Direction) => {
+    let x = o.x, y = o.y;
+    switch (dir) {
+        case Direction.Top:
+            y--;
+            break;
+        case Direction.Btm:
+            y++;
+            break;
+        case Direction.Rgt:
+            x++;
+            break;
+        case Direction.Lft:
+            x--;
+            break;
+        default:
+            return null;
+    }
+    return { x, y };
+};
+
+/* g1 is expected to move in dir, and g2 is stationary */
+const willCollide = (g1: ObjGroup, g2: ObjGroup, dir: Direction) => {
+    const gn = getNextGroupPos(g1, dir);
+    if (!gn) return false;
+
+    const g1OverlapX = Math.max(g2.x - gn.x, 0);
+    const g1OverlapY = Math.max(g2.y - gn.y, 0);
+    const g1OverlapW = Math.min(gWidth(g2), gWidth(g1) - g1OverlapX);
+    const g1OverlapH = Math.min(gHeight(g2), gHeight(g1) - g1OverlapY);
+
+    const g2OverlapX = Math.max(gn.x - g2.x, 0);
+    const g2OverlapY = Math.max(gn.y - g2.y, 0);
+    const g2OverlapW = Math.min(gWidth(g1), gWidth(g2) - g2OverlapX);
+    const g2OverlapH = Math.min(gHeight(g1), gHeight(g2) - g2OverlapY);
+
+    for (let h = 0; h < Math.min(g1OverlapH, g2OverlapH); h++)
+        for (let w = 0; w < Math.min(g1OverlapW, g2OverlapW); w++)
+            if (g1.grid[g1OverlapY + h][g1OverlapX + w] !== Opt.None &&
+                g2.grid[g2OverlapY + h][g2OverlapX + w] !== Opt.None)
+                return true;
+    return false;
+};
 };
 
 /* Also resets next dirs */
@@ -261,6 +301,75 @@ console.log(splitGroup(
         x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     },
     1, 1));
+
+// should be false
+console.log(willCollide(
+    {
+        grid: [
+            [1, 1],
+            [1, 0],
+        ],
+        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+    },
+    {
+        grid: [
+            [0, 1],
+            [1, 1],
+        ],
+        x: 2, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+    }, Direction.Rgt));
+
+// should be false
+console.log(willCollide(
+    {
+        grid: [
+            [1, 1],
+            [1, 0],
+        ],
+        x: 2, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+    },
+    {
+        grid: [
+            [0, 1],
+            [1, 0],
+            [1, 0],
+        ],
+        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+    }, Direction.Lft));
+
+// should be false
+console.log(willCollide(
+    {
+        grid: [
+            [0, 1, 0],
+            [1, 1, 1],
+        ],
+        x: 1, y: 2, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+    },
+    {
+        grid: [
+            [0, 1],
+            [1, 0],
+        ],
+        x: 1, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+    }, Direction.Top));
+
+// should be true
+console.log(willCollide(
+    {
+        grid: [
+            [1, 1],
+            [1, 0],
+        ],
+        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+    },
+    {
+        grid: [
+            [0, 1],
+            [1, 1],
+        ],
+        x: 0, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+    }, Direction.Btm));
 
 // }}}
 
