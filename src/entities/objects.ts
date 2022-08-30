@@ -27,8 +27,19 @@ type ObjGroup = {
     x: number;
     y: number;
     grid: Opt[][];
+    // set by operators
+    intent: Direction;
+    // set after collision resolution
     next: Direction;
     type: Type;
+};
+
+type Range = {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    strip: Opt[];
 };
 
 // }}}
@@ -53,7 +64,7 @@ const setupTypeCtx = (t: Type) => {
 
 const drawLerpedGroup = (grp: ObjGroup) => {
     let baseX = grp.x, baseY = grp.y;
-    switch (grp.next) {
+    switch (grp.intent) {
         case Direction.Non:
             break;
         case Direction.Top:
@@ -110,12 +121,13 @@ const mergeGroups = (groups: ObjGroup[]): ObjGroup => {
         y: finalY,
         grid: finalGrid,
         type: groups[0].type,
+        intent: Direction.Non,
         next: Direction.Non,
     };
 };
 
-const spawnObjectGroup = (x: number, y: number, next = Direction.Non, type = Type.Face): ObjGroup =>
-    ({ x, y, grid: [[Opt.Some]], next, type });
+const spawnObjectGroup = (x: number, y: number, intent = Direction.Non, type = Type.Face): ObjGroup =>
+    ({ x, y, grid: [[Opt.Some]], intent, next: Direction.Non, type });
 
 const isGroupNotEmpty = (g: ObjGroup) => g.grid.length > 0 && g.grid[0].length > 0;
 
@@ -134,6 +146,7 @@ const splitGroup = (group: ObjGroup, x: number, y: number, newType = Type.Face) 
         const extraGroup = {
             x: x + 1,
             y: group.y,
+            intent: group.intent,
             next: group.next,
             type: group.type,
             grid: group.grid.map(row => row.slice(relX + 1)),
@@ -148,6 +161,7 @@ const splitGroup = (group: ObjGroup, x: number, y: number, newType = Type.Face) 
         const extraGroup = {
             x: group.x,
             y: y + 1,
+            intent: group.intent,
             next: group.next,
             type: group.type,
             grid: group.grid.slice(relY + 1),
@@ -214,7 +228,7 @@ console.log(splitGroup(
             [1, 1, 1],
             [1, 1, 1],
         ],
-        x: 1, y: 1, type: Type.Face, next: Direction.Non,
+        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     },
     2, 2));
 console.log(splitGroup(
@@ -224,7 +238,7 @@ console.log(splitGroup(
             [1, 0, 1],
             [1, 0, 1],
         ],
-        x: 1, y: 1, type: Type.Face, next: Direction.Non,
+        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     },
     2, 1));
 console.log(splitGroup(
@@ -234,7 +248,7 @@ console.log(splitGroup(
             [1, 0, 0],
             [1, 1, 1],
         ],
-        x: 1, y: 1, type: Type.Face, next: Direction.Non,
+        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     },
     1, 2));
 console.log(splitGroup(
@@ -244,7 +258,7 @@ console.log(splitGroup(
             [0, 1, 1],
             [0, 1, 1],
         ],
-        x: 1, y: 1, type: Type.Face, next: Direction.Non,
+        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     },
     1, 1));
 
