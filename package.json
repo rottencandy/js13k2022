@@ -16,7 +16,7 @@
     "bundle": "./bundle.sh"
   },
   "devDependencies": {
-    "esbuild": "^0.15.5",
+    "esbuild": "^0.15.6",
     "esbuild-plugin-spglsl": "^0.0.3",
     "google-closure-compiler": "^20220803.0.0",
     "html-inline": "^1.2.0",
