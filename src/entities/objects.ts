@@ -124,7 +124,7 @@ const spawnObjectGroup = (x: number, y: number, intent = Direction.Non, type = T
 const gWidth = (o: ObjGroup) => o.grid[0].length;
 const gHeight = (o: ObjGroup) => o.grid.length;
 
-const isGroupNotEmpty = (g: ObjGroup) => gWidth(g) > 0 && gHeight(g) > 0;
+const isGroupNotEmpty = (g: ObjGroup) => gHeight(g) > 0 && gWidth(g) > 0;
 
 /* assuming x,y is inside group, does nothing if element at pos is empty */
 const splitGroup = (group: ObjGroup, x: number, y: number, newType = Type.Face) => {
@@ -197,6 +197,12 @@ const getNextGroupPos = (o: ObjGroup, dir: Direction) => {
 const willCollide = (g1: ObjGroup, g2: ObjGroup, dir: Direction) => {
     const gn = getNextGroupPos(g1, dir);
     if (!gn) return false;
+    // preliminary bound checks to make sure we're always overlapping
+    if (gn.x - g2.x > gWidth(g2) ||
+        g2.x - gn.x > gWidth(g1) ||
+        gn.y - g2.y > gHeight(g2) ||
+        g2.y - gn.y > gHeight(g1))
+        return false;
 
     const g1OverlapX = Math.max(g2.x - gn.x, 0);
     const g1OverlapY = Math.max(g2.y - gn.y, 0);
@@ -369,6 +375,17 @@ console.log(willCollide(
             [1, 1],
         ],
         x: 0, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+    }, Direction.Btm));
+
+// should be false
+console.log(willCollide(
+    {
+        grid: [[1]],
+        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+    },
+    {
+        grid: [[0]],
+        x: 5, y: 5, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     }, Direction.Btm));
 
 // }}}
