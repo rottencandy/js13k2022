@@ -186,31 +186,28 @@ const getNextGroupPos = (o: ObjGroup, dir: Direction) => {
             break;
         case Direction.Lft:
             x--;
-            break;
-        default:
-            return null;
     }
     return { x, y };
 };
 
 /* g1 is expected to move in dir, and g2 is stationary */
-const willCollide = (g1: ObjGroup, g2: ObjGroup, dir: Direction) => {
-    const gn = getNextGroupPos(g1, dir);
-    if (!gn) return false;
+const willCollide = (g1: ObjGroup, dir1: Direction, g2: ObjGroup, dir2 = Direction.Non) => {
+    const g1n = getNextGroupPos(g1, dir1);
+    const g2n = getNextGroupPos(g2, dir2);
     // preliminary bound checks to make sure we're always overlapping
-    if (gn.x - g2.x > gWidth(g2) ||
-        g2.x - gn.x > gWidth(g1) ||
-        gn.y - g2.y > gHeight(g2) ||
-        g2.y - gn.y > gHeight(g1))
+    if (g1n.x - g2n.x > gWidth(g2) ||
+        g2n.x - g1n.x > gWidth(g1) ||
+        g1n.y - g2n.y > gHeight(g2) ||
+        g2n.y - g1n.y > gHeight(g1))
         return false;
 
-    const g1OverlapX = Math.max(g2.x - gn.x, 0);
-    const g1OverlapY = Math.max(g2.y - gn.y, 0);
+    const g1OverlapX = Math.max(g2n.x - g1n.x, 0);
+    const g1OverlapY = Math.max(g2n.y - g1n.y, 0);
     const g1OverlapW = Math.min(gWidth(g2), gWidth(g1) - g1OverlapX);
     const g1OverlapH = Math.min(gHeight(g2), gHeight(g1) - g1OverlapY);
 
-    const g2OverlapX = Math.max(gn.x - g2.x, 0);
-    const g2OverlapY = Math.max(gn.y - g2.y, 0);
+    const g2OverlapX = Math.max(g1n.x - g2n.x, 0);
+    const g2OverlapY = Math.max(g1n.y - g2n.y, 0);
     const g2OverlapW = Math.min(gWidth(g1), gWidth(g2) - g2OverlapX);
     const g2OverlapH = Math.min(gHeight(g1), gHeight(g2) - g2OverlapY);
 
@@ -221,10 +218,52 @@ const willCollide = (g1: ObjGroup, g2: ObjGroup, dir: Direction) => {
                 return true;
     return false;
 };
+
+/* Sets the next for each group, and returns if it can end up moving */
+const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[], id: number) => {
+    // todo: add checks for operator obstacles
+    if (g.next !== Direction.Non) {
+        return true;
+    }
+    const blockingGroups = gs
+        .filter((pg, i) => {
+            if (i === id) return false;
+
+            if (!willCollide(g, dir, pg, pg.intent)) return false;
+
+            if (pg.intent === Direction.Non) {
+                // todo: consider pusher
+                if (pg.next !== Direction.Non) return willCollide(g, dir, pg, pg.next);
+
+                const canBePushed = calcNextMove(pg, dir, gs, i);
+                if (canBePushed) {
+                    pg.next = dir;
+                    return false;
+                } else return true;
+
+            } else {
+                if (pg.next === pg.intent) return true;
+
+                const isMoving = calcNextMove(pg, pg.intent, gs, i);
+                if (isMoving) {
+                    return false;
+                } else {
+                    if (calcNextMove(pg, dir, gs, i)) {
+                        pg.intent = dir;
+                        return false;
+                    }
+                }
+            }
+        });
+    const canMove = blockingGroups.length === 0;
+    if (canMove) {
+        g.next = dir;
+    }
+    return canMove;
 };
 
 /* Also resets next dirs */
-const updatePos = (o: ObjGroup) => {
+const updatePos = (o: ObjGroup, id: number, gs: ObjGroup[]) => {
     switch (o.intent) {
         case Direction.Non:
             break;
@@ -242,6 +281,8 @@ const updatePos = (o: ObjGroup) => {
     }
     o.next = Direction.Non;
     o.intent = Direction.Non;
+    // todo: fetch operator move intents here
+    calcNextMove(o, o.intent, gs, id)
 };
 
 const sm = createStateMachine({
@@ -264,8 +305,8 @@ const sm = createStateMachine({
 
 // so called "tests" {{{
 
-ObjGroups.push(spawnObjectGroup(0, 0, Direction.Top));
-ObjGroups.push(spawnObjectGroup(1, 1, Direction.Rgt));
+ObjGroups.push(spawnObjectGroup(0, 0, Direction.Rgt));
+ObjGroups.push(spawnObjectGroup(2, 0, Direction.Non));
 console.log(mergeGroups([spawnObjectGroup(0, 0), spawnObjectGroup(0, 1)]));
 console.log(splitGroup(
     {
@@ -317,13 +358,14 @@ console.log(willCollide(
         ],
         x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     },
+    Direction.Rgt,
     {
         grid: [
             [0, 1],
             [1, 1],
         ],
         x: 2, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }, Direction.Rgt));
+    }));
 
 // should be false
 console.log(willCollide(
@@ -334,6 +376,7 @@ console.log(willCollide(
         ],
         x: 2, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     },
+    Direction.Lft,
     {
         grid: [
             [0, 1],
@@ -341,7 +384,7 @@ console.log(willCollide(
             [1, 0],
         ],
         x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }, Direction.Lft));
+    }));
 
 // should be false
 console.log(willCollide(
@@ -352,13 +395,14 @@ console.log(willCollide(
         ],
         x: 1, y: 2, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     },
+    Direction.Top,
     {
         grid: [
             [0, 1],
             [1, 0],
         ],
         x: 1, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }, Direction.Top));
+    }));
 
 // should be true
 console.log(willCollide(
@@ -369,13 +413,14 @@ console.log(willCollide(
         ],
         x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     },
+    Direction.Btm,
     {
         grid: [
             [0, 1],
             [1, 1],
         ],
         x: 0, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }, Direction.Btm));
+    }));
 
 // should be false
 console.log(willCollide(
@@ -383,10 +428,11 @@ console.log(willCollide(
         grid: [[1]],
         x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     },
+    Direction.Btm,
     {
         grid: [[0]],
         x: 5, y: 5, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }, Direction.Btm));
+    }));
 
 // }}}
 
