@@ -2,10 +2,11 @@ import { createStateMachine } from '../engine/state';
 import { createTween, ticker } from '../engine/interpolation';
 import { createRectTex } from '../rect';
 import { makeTextTex } from '../text';
+import { getOperatorIntent, isObstaclePresent } from './operators';
 
 // Types {{{
 
-const enum Direction {
+export const enum Direction {
     Top = 0,
     Rgt = 1,
     Btm = 2,
@@ -49,14 +50,14 @@ const objCtx = createRectTex(makeTextTex('🥳', 120));
 const setupTypeCtx = (t: Type) => {
     switch (t) {
         case Type.Face:
-            objCtx.use_()
-            break;
+            objCtx.use_();
+            return objCtx;
     }
 };
 
 const drawLerpedGroup = (grp: ObjGroup) => {
     let baseX = grp.x, baseY = grp.y;
-    switch (grp.intent) {
+    switch (grp.next) {
         case Direction.Non:
             break;
         case Direction.Top:
@@ -73,10 +74,10 @@ const drawLerpedGroup = (grp: ObjGroup) => {
         case Direction.Lft:
             baseX -= moveTween.val;
     }
-    setupTypeCtx(grp.type);
+    const ctx = setupTypeCtx(grp.type);
     grp.grid.map(
         (row, i) => row.map(
-            (t, j) => t && objCtx.draw_(baseX + j + 1, baseY + i + 1, 0)
+            (t, j) => t && ctx.draw_(baseX + j + 1, baseY + i + 1, 0)
         )
     );
 };
@@ -176,10 +177,10 @@ const getNextGroupPos = (o: ObjGroup, dir: Direction) => {
     let x = o.x, y = o.y;
     switch (dir) {
         case Direction.Top:
-            y--;
+            y++;
             break;
         case Direction.Btm:
-            y++;
+            y--;
             break;
         case Direction.Rgt:
             x++;
@@ -221,10 +222,10 @@ const willCollide = (g1: ObjGroup, dir1: Direction, g2: ObjGroup, dir2 = Directi
 
 /* Sets the next for each group, and returns if it can end up moving */
 const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[], id: number) => {
-    // todo: add checks for operator obstacles
-    if (g.next !== Direction.Non) {
-        return true;
-    }
+    if (g.next !== Direction.Non) return true;
+    const gnp = getNextGroupPos(g, dir);
+    if (isObstaclePresent(gnp.x, gnp.y)) return false;
+
     const blockingGroups = gs
         .filter((pg, i) => {
             if (i === id) return false;
@@ -232,10 +233,10 @@ const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[], id: number) =
             if (!willCollide(g, dir, pg, pg.intent)) return false;
 
             if (pg.intent === Direction.Non) {
-                // todo: consider pusher
+                // todo: consider pusher?(Is pusher already considered through filter?)
                 if (pg.next !== Direction.Non) return willCollide(g, dir, pg, pg.next);
 
-                const canBePushed = calcNextMove(pg, dir, gs, i);
+                const canBePushed = calcNextMove(pg, dir, gs, id);
                 if (canBePushed) {
                     pg.next = dir;
                     return false;
@@ -244,11 +245,11 @@ const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[], id: number) =
             } else {
                 if (pg.next === pg.intent) return true;
 
-                const isMoving = calcNextMove(pg, pg.intent, gs, i);
+                const isMoving = calcNextMove(pg, pg.intent, gs, id);
                 if (isMoving) {
                     return false;
                 } else {
-                    if (calcNextMove(pg, dir, gs, i)) {
+                    if (calcNextMove(pg, dir, gs, id)) {
                         pg.intent = dir;
                         return false;
                     }
@@ -263,8 +264,8 @@ const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[], id: number) =
 };
 
 /* Also resets next dirs */
-const updatePos = (o: ObjGroup, id: number, gs: ObjGroup[]) => {
-    switch (o.intent) {
+const updatePos = (o: ObjGroup) => {
+    switch (o.next) {
         case Direction.Non:
             break;
         case Direction.Top:
@@ -280,15 +281,16 @@ const updatePos = (o: ObjGroup, id: number, gs: ObjGroup[]) => {
             o.x--;
     }
     o.next = Direction.Non;
-    o.intent = Direction.Non;
-    // todo: fetch operator move intents here
-    calcNextMove(o, o.intent, gs, id)
 };
 
 const sm = createStateMachine({
     [State.Idle]: (dt) => {
         if (waitTicker(dt)) {
-            return State.Moving
+            ObjGroups.map((g, id) => {
+                g.intent = getOperatorIntent(g.x, g.y);
+                calcNextMove(g, g.intent, ObjGroups, id);
+            });
+            return State.Moving;
         };
     },
     [State.Moving]: (dt) => {
@@ -305,8 +307,8 @@ const sm = createStateMachine({
 
 // so called "tests" {{{
 
-ObjGroups.push(spawnObjectGroup(0, 0, Direction.Rgt));
-ObjGroups.push(spawnObjectGroup(2, 0, Direction.Non));
+ObjGroups.push(spawnObjectGroup(0, 0, Direction.Non));
+ObjGroups.push(spawnObjectGroup(0, 1, Direction.Non));
 console.log(mergeGroups([spawnObjectGroup(0, 0), spawnObjectGroup(0, 1)]));
 console.log(splitGroup(
     {
@@ -349,7 +351,6 @@ console.log(splitGroup(
     },
     1, 1));
 
-// should be false
 console.log(willCollide(
     {
         grid: [
@@ -365,9 +366,7 @@ console.log(willCollide(
             [1, 1],
         ],
         x: 2, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }));
-
-// should be false
+    }) === false);
 console.log(willCollide(
     {
         grid: [
@@ -384,9 +383,7 @@ console.log(willCollide(
             [1, 0],
         ],
         x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }));
-
-// should be false
+    }) === false);
 console.log(willCollide(
     {
         grid: [
@@ -402,9 +399,7 @@ console.log(willCollide(
             [1, 0],
         ],
         x: 1, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }));
-
-// should be true
+    }) === false);
 console.log(willCollide(
     {
         grid: [
@@ -420,9 +415,7 @@ console.log(willCollide(
             [1, 1],
         ],
         x: 0, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }));
-
-// should be false
+    }) === false);
 console.log(willCollide(
     {
         grid: [[1]],
@@ -432,7 +425,7 @@ console.log(willCollide(
     {
         grid: [[0]],
         x: 5, y: 5, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }));
+    }) === false);
 
 // }}}
 
