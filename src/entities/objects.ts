@@ -220,23 +220,25 @@ const willCollide = (g1: ObjGroup, dir1: Direction, g2: ObjGroup, dir2 = Directi
     return false;
 };
 
+let checkedGroups: number[] = [];
 /* Sets the next for each group, and returns if it can end up moving */
-const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[], id: number) => {
-    if (g.next !== Direction.Non) return true;
+const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[]) => {
+    if (g.next !== Direction.Non) return g.next === dir;
     const gnp = getNextGroupPos(g, dir);
     if (isObstaclePresent(gnp.x, gnp.y)) return false;
 
     const blockingGroups = gs
-        .filter((pg, i) => {
-            if (i === id) return false;
+        .filter((pg, id) => {
+            if (checkedGroups.includes(id)) return false;
+            checkedGroups.push(id);
 
             if (!willCollide(g, dir, pg, pg.intent)) return false;
 
             if (pg.intent === Direction.Non) {
-                // todo: consider pusher?(Is pusher already considered through filter?)
+                // todo: consider pusher?(Isn't pusher already considered through filter?)
                 if (pg.next !== Direction.Non) return willCollide(g, dir, pg, pg.next);
 
-                const canBePushed = calcNextMove(pg, dir, gs, id);
+                const canBePushed = calcNextMove(pg, dir, gs);
                 if (canBePushed) {
                     pg.next = dir;
                     return false;
@@ -245,11 +247,11 @@ const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[], id: number) =
             } else {
                 if (pg.next === pg.intent) return true;
 
-                const isMoving = calcNextMove(pg, pg.intent, gs, id);
+                const isMoving = calcNextMove(pg, pg.intent, gs);
                 if (isMoving) {
                     return false;
                 } else {
-                    if (calcNextMove(pg, dir, gs, id)) {
+                    if (calcNextMove(pg, dir, gs)) {
                         pg.intent = dir;
                         return false;
                     }
@@ -286,10 +288,13 @@ const updatePos = (o: ObjGroup) => {
 const sm = createStateMachine({
     [State.Idle]: (dt) => {
         if (waitTicker(dt)) {
-            ObjGroups.map((g, id) => {
+            ObjGroups.map((g) => {
                 g.intent = getOperatorIntent(g.x, g.y);
-                calcNextMove(g, g.intent, ObjGroups, id);
             });
+            ObjGroups.map((g) => {
+                calcNextMove(g, g.intent, ObjGroups);
+            });
+            checkedGroups = [];
             return State.Moving;
         };
     },
