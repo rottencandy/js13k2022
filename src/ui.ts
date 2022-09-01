@@ -20,7 +20,7 @@ export const showTitle = () => {
     const startBtn = createEle('div', { id: 'start', onclick: () => { startGame(); hideUI(); }, }, 'start');
 
     root.append(
-        createEle('div', { id: 'title' }, 'Untitled Game'),
+        createEle('div', { id: 'title' }, 'Untitled'),
         startBtn,
     );
     showUI();

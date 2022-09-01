@@ -120,7 +120,7 @@ const mergeGroups = (groups: ObjGroup[]): ObjGroup => {
 };
 
 const spawnObjectGroup = (x: number, y: number, intent = Direction.Non, type = Type.Face): ObjGroup =>
-    ({ x, y, grid: [[Opt.Some]], intent, next: Direction.Non, type });
+    ({ x, y, grid: [[Opt.Some, Opt.Some]], intent, next: Direction.Non, type });
 
 const gWidth = (o: ObjGroup) => o.grid[0].length;
 const gHeight = (o: ObjGroup) => o.grid.length;
@@ -191,6 +191,34 @@ const getNextGroupPos = (o: ObjGroup, dir: Direction) => {
     return { x, y };
 };
 
+const setOperatorIntents = (g: ObjGroup) => {
+    for (let h = 0; h < g.grid.length; h++)
+        for (let w = 0; w < g.grid[h].length; w++) {
+            const e = g.grid[h][w];
+            if (e === Opt.Some) {
+                const i = getOperatorIntent(g.x + w, g.y + h);
+                if (i !== Direction.Non) {
+                    g.intent = i;
+                    return;
+                }
+            }
+        }
+    g.intent = Direction.Non;
+};
+
+const checkObstacles = (g: ObjGroup, dir: Direction) => {
+    switch (dir) {
+        case Direction.Top:
+            return g.grid[0].some((e, i) => e === Opt.Some && isObstaclePresent(g.x + i, g.y + 1))
+        case Direction.Btm:
+            return g.grid[g.grid.length - 1].some((e, i) => e === Opt.Some && isObstaclePresent(g.x + i, g.y + g.grid.length))
+        case Direction.Rgt:
+            return g.grid.some((e, i) => e[g.grid[0].length - 1] === Opt.Some && isObstaclePresent(g.x + g.grid[0].length, g.y + i))
+        case Direction.Lft:
+            return g.grid.some((e, i) => e[0] === Opt.Some && isObstaclePresent(g.x - 1, g.y + i))
+    }
+};
+
 /* g1 is expected to move in dir, and g2 is stationary */
 const willCollide = (g1: ObjGroup, dir1: Direction, g2: ObjGroup, dir2 = Direction.Non) => {
     const g1n = getNextGroupPos(g1, dir1);
@@ -220,20 +248,21 @@ const willCollide = (g1: ObjGroup, dir1: Direction, g2: ObjGroup, dir2 = Directi
     return false;
 };
 
+// required to not recursively search indefinitely
 let checkedGroups: number[] = [];
 /* Sets the next for each group, and returns if it can end up moving */
 const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[]) => {
     if (g.next !== Direction.Non) return g.next === dir;
     const gnp = getNextGroupPos(g, dir);
     if (gnp.x > WIDTH || gnp.x < 0 || gnp.y > HEIGHT || gnp.y < 0) return false;
-    if (isObstaclePresent(gnp.x, gnp.y)) return false;
+    if (checkObstacles(g, dir)) return false;
 
     const blockingGroups = gs
         .filter((pg, id) => {
+            if (g.x === pg.x && g.y === pg.y) return false;
+            if (!willCollide(g, dir, pg, pg.intent)) return false;
             if (checkedGroups.includes(id)) return false;
             checkedGroups.push(id);
-
-            if (!willCollide(g, dir, pg, pg.intent)) return false;
 
             if (pg.intent === Direction.Non) {
                 // todo: consider pusher?(Isn't pusher already considered through filter?)
@@ -289,13 +318,11 @@ const updatePos = (o: ObjGroup) => {
 const sm = createStateMachine({
     [State.Idle]: (dt) => {
         if (waitTicker(dt)) {
-            ObjGroups.map((g) => {
-                g.intent = getOperatorIntent(g.x, g.y);
-            });
+            ObjGroups.map(setOperatorIntents);
             ObjGroups.map((g) => {
                 calcNextMove(g, g.intent, ObjGroups);
+                checkedGroups = [];
             });
-            checkedGroups = [];
             return State.Moving;
         };
     },
@@ -313,8 +340,8 @@ const sm = createStateMachine({
 
 // so called "tests" {{{
 
-ObjGroups.push(spawnObjectGroup(0, 0, Direction.Non));
-ObjGroups.push(spawnObjectGroup(0, 1, Direction.Non));
+ObjGroups.push(spawnObjectGroup(0, 0));
+ObjGroups.push(spawnObjectGroup(0, 1));
 console.log(mergeGroups([spawnObjectGroup(0, 0), spawnObjectGroup(0, 1)]));
 console.log(splitGroup(
     {
@@ -432,6 +459,13 @@ console.log(willCollide(
         grid: [[0]],
         x: 5, y: 5, type: Type.Face, intent: Direction.Non, next: Direction.Non,
     }) === false);
+console.log(
+    willCollide(
+        spawnObjectGroup(0, 0),
+        Direction.Top,
+        spawnObjectGroup(0, 1),
+        Direction.Rgt
+    ) === true);
 
 // }}}
 

@@ -39,7 +39,7 @@ const spawnOperator = (x: number, y: number, type: Type, dir: Direction) =>
     Operators.push({ x, y, type, dir });
 
 spawnOperator(0, 0, Type.Belt, Direction.Top);
-spawnOperator(0, 1, Type.Belt, Direction.Top);
+spawnOperator(0, 1, Type.Belt, Direction.Rgt);
 
 export const isObstaclePresent = (x: number, y: number) => {
     return Operators.find(o => o.x === x && o.y === y && o.type === Type.Block);
