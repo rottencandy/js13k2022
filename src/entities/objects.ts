@@ -37,8 +37,8 @@ type ObjGroup = {
 
 // }}}
 
-//const WIDTH = 8;
-//const HEIGHT = 8;
+const WIDTH = 8;
+const HEIGHT = 8;
 
 const ObjGroups: ObjGroup[] = [];
 const moveTween = createTween(0, 1, 900);
@@ -225,6 +225,7 @@ let checkedGroups: number[] = [];
 const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[]) => {
     if (g.next !== Direction.Non) return g.next === dir;
     const gnp = getNextGroupPos(g, dir);
+    if (gnp.x > WIDTH || gnp.x < 0 || gnp.y > HEIGHT || gnp.y < 0) return false;
     if (isObstaclePresent(gnp.x, gnp.y)) return false;
 
     const blockingGroups = gs
