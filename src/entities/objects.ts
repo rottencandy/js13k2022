@@ -260,12 +260,12 @@ const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[]) => {
     const blockingGroups = gs
         .filter((pg, id) => {
             if (g.x === pg.x && g.y === pg.y) return false;
+            // todo: Is checking only intent here sufficient?
             if (!willCollide(g, dir, pg, pg.intent)) return false;
             if (checkedGroups.includes(id)) return false;
             checkedGroups.push(id);
 
             if (pg.intent === Direction.Non) {
-                // todo: consider pusher?(Isn't pusher already considered through filter?)
                 if (pg.next !== Direction.Non) return willCollide(g, dir, pg, pg.next);
 
                 const canBePushed = calcNextMove(pg, dir, gs);
@@ -279,7 +279,7 @@ const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[]) => {
 
                 const isMoving = calcNextMove(pg, pg.intent, gs);
                 if (isMoving) {
-                    return false;
+                    return willCollide(g, dir, pg, pg.next);
                 } else {
                     if (calcNextMove(pg, dir, gs)) {
                         pg.intent = dir;
