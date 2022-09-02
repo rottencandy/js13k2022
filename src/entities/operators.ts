@@ -32,7 +32,7 @@ const typeCtx = (t: Type) => {
 
 const drawOperator = (o: Operator) => {
     const ctx = typeCtx(o.type);
-    ctx.draw_(o.x + 1, o.y + 1, -0.01);
+    ctx.draw_(o.x, o.y, -0.01);
 };
 
 const spawnOperator = (x: number, y: number, type: Type, dir: Direction) =>
