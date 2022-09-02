@@ -36,6 +36,7 @@ export const Keys: WatchedKeys = {
 //export const dirKeysPressed = (): boolean => !!(Keys.left_ || Keys.right_ || Keys.up_ || Keys.down_);
 
 //const ARROW = 'Arrow';
+let clicked = false;
 
 /**
  * Initialize onkey listeners
@@ -73,8 +74,8 @@ export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, heigh
     //window.onkeydown = setKeyState(!!1);
     //window.onkeyup = setKeyState(!!0);
 
-    canvas.onpointerdown = () => Keys.clicked_ = !!1;
-    canvas.onpointerup = () => Keys.clicked_ = !!0;
+    canvas.onpointerdown = () => (Keys.clicked_ = clicked = true);
+    canvas.onpointerup = () => Keys.clicked_ = false;
     canvas.onpointermove = e => {
         const ratio = deviceScaleRatio(width, height);
         Keys.ptrX_ = e.offsetX / ratio;
@@ -96,8 +97,17 @@ export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, heigh
     //document.addEventListener('pointerlockchange', () => {
     //    Keys.pointerLocked_ = document.pointerLockElement === canvas;
     //});
-    document.onmousemove = (e) => {
-        Keys.ptrX_ = e.movementX;
-        Keys.ptrY_ = e.movementY;
+    canvas.onmousemove = (e) => {
+        const ratio = deviceScaleRatio(width, height);
+        Keys.ptrX_ = e.x / ratio;
+        Keys.ptrY_ = e.y / ratio;
     };
+};
+
+export const justClicked = () => {
+    if (clicked) {
+        clicked = false;
+        return true;
+    }
+    return false;
 };
