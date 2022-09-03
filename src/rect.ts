@@ -25,17 +25,20 @@ export const createRectTex = (tex: any) => {
     const uni = sh.uniform_;
     uni`uMat`.m4fv_(CAM.matrix_);
 
-    return {
+    const thisObj = {
         use_() {
             tex.bind_();
             mesh.vao_.bind_();
             sh.use_();
+            return thisObj;
         },
         draw_(x: number, y: number, z: number) {
             uni`uPos`.u3f_(x,y,z);
             mesh.draw_();
+            return thisObj;
         },
     };
+    return thisObj;
 };
 
 export const createShadedRect = (frag: string, width = 1, height = width) => {
@@ -45,14 +48,17 @@ export const createShadedRect = (frag: string, width = 1, height = width) => {
     uni`uMat`.m4fv_(CAM.matrix_);
     uni`uSize`.u2f_(width, height);
 
-    return {
+    const thisObj = {
         use_() {
             mesh.vao_.bind_();
             sh.use_();
+            return thisObj;
         },
         draw_(x: number, y: number, z: number) {
             uni`uPos`.u3f_(x,y,z);
             mesh.draw_();
+            return thisObj;
         },
     };
+    return thisObj;
 };

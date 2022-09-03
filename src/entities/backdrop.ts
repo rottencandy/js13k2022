@@ -4,6 +4,5 @@ import rectFrag from '../shaders/backdrop.frag';
 let obj = createShadedRect(rectFrag, 16, 10);
 
 export const render = () => {
-    obj.use_();
-    obj.draw_(-3,-1,-.02);
+    obj.use_().draw_(-2,-1,-.02);
 };
