@@ -1,6 +1,9 @@
 import { createGLContext } from './engine/webgl2';
 import Camera from './engine/cam';
 
+export const GAME_WIDTH = 640;
+export const GAME_HEIGHT = 360;
+
 /** Create element with props */
 export const createEle = (name: string, props = {}, val = null) => {
     const ele = document.createElement(name);
@@ -18,7 +21,7 @@ export const
     radians = (a: number) => a * Math.PI / 180,
     F32 = (x: Iterable<number>) => new Float32Array(x);
 
-export const CTX = createGLContext(document.getElementById('c') as HTMLCanvasElement, 640, 360);
+export const CTX = createGLContext(document.getElementById('c') as HTMLCanvasElement, GAME_WIDTH, GAME_HEIGHT);
 (window.onresize = CTX.resize_)();
 
 export const CAM = Camera(radians(45), 1, 400, 640/360).move_(-4,4,-10).recalculate_();

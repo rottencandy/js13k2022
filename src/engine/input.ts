@@ -81,7 +81,7 @@ export const setupKeyListener = (canvas: HTMLCanvasElement) => {
 
     canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = canvas.ontouchcancel = e => {
         e.preventDefault();
-        Keys.clicked_ = e.touches.length > 0;
+        Keys.clicked_ = clicked = e.touches.length > 0;
         if (Keys.clicked_) {
             const offset = canvas.getBoundingClientRect();
             Keys.ptrX_ = (e.touches[0].clientX - offset.left) / canvas.clientWidth;
