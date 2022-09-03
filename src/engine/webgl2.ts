@@ -320,7 +320,7 @@ export const createGLContext = (canvas: HTMLCanvasElement, width = 400, height =
     // For pre-multiplied alpha textures
     //gl.blendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     gl.clearDepth(1.);
-    setupKeyListener(canvas, width, height);
+    setupKeyListener(canvas);
 
     const thisObj: WebglState = {
         gl_: gl,

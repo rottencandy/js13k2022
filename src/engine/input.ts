@@ -1,5 +1,3 @@
-import { deviceScaleRatio } from '../globals';
-
 type WatchedKeys = {
     //left_: boolean,
     //right_: boolean,
@@ -41,7 +39,7 @@ let clicked = false;
 /**
  * Initialize onkey listeners
 */
-export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, height: number) => {
+export const setupKeyListener = (canvas: HTMLCanvasElement) => {
     // TODO: use keycode here?
     //const setKeyState = (value: boolean) => ({ key: code }) => {
     //    switch (code) {
@@ -77,9 +75,8 @@ export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, heigh
     canvas.onpointerdown = () => (Keys.clicked_ = clicked = true);
     canvas.onpointerup = () => Keys.clicked_ = false;
     canvas.onpointermove = e => {
-        const ratio = deviceScaleRatio(width, height);
-        Keys.ptrX_ = e.offsetX / ratio;
-        Keys.ptrY_ = e.offsetY / ratio;
+        Keys.ptrX_ = e.offsetX / canvas.clientWidth;
+        Keys.ptrY_ = e.offsetY / canvas.clientHeight;
     };
 
     canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = canvas.ontouchcancel = e => {
@@ -87,10 +84,9 @@ export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, heigh
         Keys.clicked_ = e.touches.length > 0;
         if (Keys.clicked_) {
             const offset = canvas.getBoundingClientRect();
-            const ratio = deviceScaleRatio(width, height);
-            Keys.ptrX_ = (e.touches[0].clientX - offset.left) / ratio;
+            Keys.ptrX_ = (e.touches[0].clientX - offset.left) / canvas.clientWidth;
             // offset.top is not needed since canvas is always stuck to top
-            Keys.ptrY_ = e.touches[0].clientY / ratio;
+            Keys.ptrY_ = e.touches[0].clientY / canvas.clientHeight;
         }
     };
 
@@ -98,9 +94,9 @@ export const setupKeyListener = (canvas: HTMLCanvasElement, width: number, heigh
     //    Keys.pointerLocked_ = document.pointerLockElement === canvas;
     //});
     canvas.onmousemove = (e) => {
-        const ratio = deviceScaleRatio(width, height);
-        Keys.ptrX_ = e.x / ratio;
-        Keys.ptrY_ = e.y / ratio;
+        Keys.ptrX_ = e.offsetX / canvas.clientWidth;
+        Keys.ptrY_ = e.offsetY / canvas.clientHeight;
+        console.log('x: ', Keys.ptrX_, Keys.ptrY_);
     };
 };
 
