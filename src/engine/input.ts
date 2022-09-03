@@ -96,7 +96,6 @@ export const setupKeyListener = (canvas: HTMLCanvasElement) => {
     canvas.onmousemove = (e) => {
         Keys.ptrX_ = e.offsetX / canvas.clientWidth;
         Keys.ptrY_ = e.offsetY / canvas.clientHeight;
-        console.log('x: ', Keys.ptrX_, Keys.ptrY_);
     };
 };
 
