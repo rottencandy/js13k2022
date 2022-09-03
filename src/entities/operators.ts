@@ -1,8 +1,8 @@
-import { createStateMachine } from '../engine/state';
-import { createTween, ticker } from '../engine/interpolation';
 import { createRectTex } from '../rect';
 import { makeTextTex } from '../text';
 import { Direction } from './objects';
+
+// Types {{{
 
 const enum Type {
     Belt,
@@ -18,44 +18,65 @@ type Operator = {
     dir: Direction;
 }
 
-const Operators: Operator[] = [];
+// }}}
 
-const objCtx = createRectTex(makeTextTex('⏫', 120));
+const BeltOperators: Operator[] = [];
 
-const typeCtx = (t: Type) => {
-    switch (t) {
-        case Type.Belt:
-            objCtx.use_();
-            return objCtx;
-    }
-};
-
-const drawOperator = (o: Operator) => {
-    const ctx = typeCtx(o.type);
-    ctx.draw_(o.x, o.y, -0.01);
-};
-
-const spawnOperator = (x: number, y: number, type: Type, dir: Direction) =>
-    Operators.push({ x, y, type, dir });
-
-spawnOperator(0, 0, Type.Belt, Direction.Top);
-spawnOperator(0, 1, Type.Belt, Direction.Rgt);
+// Utils {{{
 
 export const isObstaclePresent = (x: number, y: number) => {
-    return Operators.find(o => o.x === x && o.y === y && o.type === Type.Block);
+    return BeltOperators.find(o => o.x === x && o.y === y && o.type === Type.Block);
 };
 
 export const getOperatorIntent = (x: number, y: number): Direction => {
-    const op = Operators.find(o => o.x === x && o.y === y);
+    const op = BeltOperators.find(o => o.x === x && o.y === y);
     if (op) {
         return op.dir;
     }
     return Direction.Non;
 };
 
+// }}}
+
+// Update {{{
+
+const typeCtx = (t: Type) => {
+    switch (t) {
+        case Type.Belt:
+            beltCtx.use_();
+            return beltCtx;
+        case Type.Block:
+            blockCtx.use_();
+            return blockCtx;
+    }
+};
+
+const spawnOperator = (x: number, y: number, type: Type, dir: Direction) =>
+    BeltOperators.push({ x, y, type, dir });
+
+spawnOperator(0, 0, Type.Belt, Direction.Top);
+spawnOperator(0, 1, Type.Belt, Direction.Rgt);
+
+// }}}
+
+// Render {{{
+
+const beltCtx = createRectTex(makeTextTex('⏫', 100));
+const blockCtx = createRectTex(makeTextTex('⬛', 100));
+
+const drawOperator = (o: Operator) => {
+    // todo: avoid using typeCtx here (optimize for use_)
+    const ctx = typeCtx(o.type);
+    ctx.draw_(o.x, o.y, -0.01);
+};
+
+// }}}
+
 export const update = (dt: number) => {
 };
 
 export const render = () => {
-    Operators.map(drawOperator);
+    BeltOperators.map(drawOperator);
 };
+
+// vim: fdm=marker:fdl=0:
