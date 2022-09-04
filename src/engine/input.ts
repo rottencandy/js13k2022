@@ -6,6 +6,7 @@ type WatchedKeys = {
     //space_: boolean,
     //esc_: boolean,
     clicked_: boolean,
+    justClicked_: boolean,
     //pointerLocked_: boolean,
     //touchX_: number,
     //touchY_: number,
@@ -23,6 +24,7 @@ export const Keys: WatchedKeys = {
     //esc_: !!0,
 
     clicked_: !!0,
+    justClicked_: !!0,
     //touchX_: 0,
     //touchY_: 0,
 
@@ -34,7 +36,7 @@ export const Keys: WatchedKeys = {
 //export const dirKeysPressed = (): boolean => !!(Keys.left_ || Keys.right_ || Keys.up_ || Keys.down_);
 
 //const ARROW = 'Arrow';
-let clicked = false;
+let justClicked = false;
 
 /**
  * Initialize onkey listeners
@@ -72,7 +74,7 @@ export const setupKeyListener = (canvas: HTMLCanvasElement) => {
     //window.onkeydown = setKeyState(!!1);
     //window.onkeyup = setKeyState(!!0);
 
-    canvas.onpointerdown = () => (Keys.clicked_ = clicked = true);
+    canvas.onpointerdown = () => (Keys.clicked_ = justClicked = true);
     canvas.onpointerup = () => Keys.clicked_ = false;
     canvas.onpointermove = e => {
         Keys.ptrX_ = e.offsetX / canvas.clientWidth;
@@ -81,7 +83,7 @@ export const setupKeyListener = (canvas: HTMLCanvasElement) => {
 
     canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = canvas.ontouchcancel = e => {
         e.preventDefault();
-        Keys.clicked_ = clicked = e.touches.length > 0;
+        Keys.clicked_ = justClicked = e.touches.length > 0;
         if (Keys.clicked_) {
             const offset = canvas.getBoundingClientRect();
             Keys.ptrX_ = (e.touches[0].clientX - offset.left) / canvas.clientWidth;
@@ -99,10 +101,11 @@ export const setupKeyListener = (canvas: HTMLCanvasElement) => {
     };
 };
 
-export const justClicked = () => {
-    if (clicked) {
-        clicked = false;
-        return true;
+export const inputPressCheck = () => {
+    if (justClicked) {
+        justClicked = false;
+        Keys.justClicked_ = true;
+    } else {
+        Keys.justClicked_ = false;
     }
-    return false;
 };

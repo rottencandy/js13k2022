@@ -1,7 +1,7 @@
 import { createRectTex, createShadedRect } from '../rect';
 import { makeTextTex } from '../text';
 import rectFrag from '../shaders/panel.frag';
-import { justClicked, Keys } from '../engine/input';
+import { Keys } from '../engine/input';
 import { SceneState } from '../scene';
 
 let bg = createShadedRect(rectFrag, 3.7, 8.5);
@@ -13,8 +13,10 @@ const stopBtn = createRectTex(makeTextTex('⏹', 100));
 const state = {
     paused: true,
     scene: SceneState.Editing,
-    btn1Scale: 1,
-    btn2Scale: 1,
+    scale: {
+        btn1: 1,
+        btn2: 1,
+    },
 };
 // todo: lerped hover size
 const BTN_HOVER_SIZE = 1.2;
@@ -34,22 +36,22 @@ export const readStateBtns = (prevState: SceneState) => {
     // outside panel
     if (Keys.ptrX_ > 0.205) return;
 
-    const clicked = justClicked();
-
     if (isPtrInBounds(btn1Pos.x, btn1Pos.y, btnWidth, btnHeight)) {
-        state.btn1Scale = BTN_HOVER_SIZE;
-        if (clicked) {
+        state.scale.btn1 = BTN_HOVER_SIZE;
+        if (Keys.justClicked_) {
             if (state.paused = !state.paused) return SceneState.Paused;
             else return SceneState.Running;
         }
-    } else state.btn1Scale = 1;
+    } else state.scale.btn1 = 1;
     if (isPtrInBounds(btn2Pos.x, btn2Pos.y, btnWidth, btnHeight)) {
-        state.btn2Scale = BTN_HOVER_SIZE;
-        if (clicked) {
+        state.scale.btn2 = BTN_HOVER_SIZE;
+        if (Keys.justClicked_) {
+            state.paused = true;
             // todo: change state
             return SceneState.Editing;
         }
-    } else state.btn2Scale = 1;
+    } else state.scale.btn2 = 1;
+};
 };
 
 export const update = (dt: number) => {
@@ -58,9 +60,9 @@ export const update = (dt: number) => {
 export const render = () => {
     bg.use_().draw_(-4, -0.1, .1);
     if (state.paused) {
-        playBtn.use_().draw_(-2.9, 6.5, .11, state.btn1Scale);
+        playBtn.use_().draw_(-2.9, 6.5, .11, state.scale.btn1);
     } else {
-        pauseBtn.use_().draw_(-2.9, 6.5, .11, state.btn1Scale);
+        pauseBtn.use_().draw_(-2.9, 6.5, .11, state.scale.btn1);
     }
-    stopBtn.use_().draw_(-1.9, 6.5, .11, state.btn2Scale);
+    stopBtn.use_().draw_(-1.9, 6.5, .11, state.scale.btn2);
 };

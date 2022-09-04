@@ -1,6 +1,7 @@
 import { CTX } from './globals';
 import { createStateMachine } from './engine/state';
 import { update as sceneUpdate, render as sceneRender } from './scene';
+import { inputPressCheck } from './engine/input';
 
 const enum State {
     Paused,
@@ -12,6 +13,7 @@ const sm = createStateMachine({
         return undefined;
     },
     [State.Playing]: (dt: number) => {
+        inputPressCheck();
         sceneUpdate(dt);
         return undefined;
     }
