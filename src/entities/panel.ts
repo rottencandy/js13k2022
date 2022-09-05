@@ -11,6 +11,10 @@ const playBtn = createRectTex(makeTextTex('▶', 100));
 const pauseBtn = createRectTex(makeTextTex('⏸', 100));
 const stopBtn = createRectTex(makeTextTex('⏹', 100));
 
+const Operators = {
+    [OperatorType.Belt]: operatorTypeCtx(OperatorType.Belt),
+};
+
 const state = {
     paused: true,
     scene: SceneState.Editing,
@@ -19,15 +23,11 @@ const state = {
         btn2: 1,
         [OperatorType.Belt]: 1,
     },
-    selectedOpr: OperatorType.Belt,
+    selectedOpr: Object.keys(Operators)[0],
 };
 // todo: lerped hover size
 const BTN_HOVER_SIZE = 1.2;
 const OPR_HOVER_SIZE = 1.1;
-
-const Operators = {
-    [OperatorType.Belt]: operatorTypeCtx(OperatorType.Belt),
-};
 
 const btn1Pos = { x: 0.027, y: 0.075 };
 const btn2Pos = { x: 0.096, y: 0.075 };
@@ -68,7 +68,7 @@ export const readOprBtns = () => {
     Object.keys(Operators).map((o, i) => {
         if (isPtrInBounds(oprBtnPos.x, oprBtnPos.y + i * btnHeight, btnWidth, btnHeight)) {
             state.scale[o] = OPR_HOVER_SIZE;
-            if (Keys.justClicked_) state.selectedOpr = o as unknown as OperatorType;
+            if (Keys.justClicked_) state.selectedOpr = o;
         } else {
             state.scale[o] = 1;
         }
@@ -89,7 +89,7 @@ export const render = () => {
 
     Object.keys(Operators).map((o, i) => {
         Operators[o].use_().draw_(-2.3, 5 - i, .11, state.scale[o]);
-        if (state.scene === SceneState.Editing && state.selectedOpr === o as unknown as OperatorType) {
+        if (state.scene === SceneState.Editing && state.selectedOpr === o) {
             selectorCtx.use_().draw_(-2.3, 5 - i, .11, 1.1);
         }
     });

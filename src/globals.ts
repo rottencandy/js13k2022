@@ -3,6 +3,8 @@ import Camera from './engine/cam';
 
 export const GAME_WIDTH = 640;
 export const GAME_HEIGHT = 360;
+export const GRID_WIDTH = 8;
+export const GRID_HEIGHT = 8;
 
 /** Create element with props */
 export const createEle = (name: string, props = {}, val = null) => {

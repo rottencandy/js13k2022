@@ -3,6 +3,7 @@ import { createTween, ticker } from '../engine/interpolation';
 import { createRectTex } from '../rect';
 import { makeTextTex } from '../text';
 import { getOperatorIntent, isObstaclePresent } from './operators';
+import { GRID_HEIGHT, GRID_WIDTH } from '../globals';
 
 // Types {{{
 
@@ -36,9 +37,6 @@ type ObjGroup = {
 };
 
 // }}}
-
-const WIDTH = 8;
-const HEIGHT = 8;
 
 const ObjGroups: ObjGroup[] = [];
 const moveTween = createTween(0, 1, 900);
@@ -254,7 +252,7 @@ let checkedGroups: number[] = [];
 const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[]) => {
     if (g.next !== Direction.Non) return g.next === dir;
     const gnp = getNextGroupPos(g, dir);
-    if (gnp.x > WIDTH || gnp.x < 0 || gnp.y > HEIGHT || gnp.y < 0) return false;
+    if (gnp.x > GRID_WIDTH || gnp.x < 0 || gnp.y > GRID_HEIGHT || gnp.y < 0) return false;
     if (checkObstacles(g, dir)) return false;
 
     const blockingGroups = gs
