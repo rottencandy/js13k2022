@@ -1,8 +1,9 @@
 import { update as panelUpdate, render as panelRender, readStateBtns, readOprBtns } from './entities/panel';
 import { render as bgRender } from './entities/backdrop';
 import { update as objectsUpdate, render as objectsRender } from './entities/objects';
-import { update as operatorsUpdate, render as operatorsRender, calcHoverOprPreview } from './entities/operators';
+import { update as operatorsUpdate, render as operatorsRender, checkGridUpdates } from './entities/operators';
 import { createStateMachine } from './engine/state';
+import { calcCursorGridPos } from './globals';
 
 export const enum SceneState {
     Editing = 1,
@@ -13,6 +14,7 @@ export const enum SceneState {
 const sm = createStateMachine({
     [SceneState.Editing]: () => {
         const next = readStateBtns(SceneState.Editing);
+        calcCursorGridPos();
         readOprBtns();
         calcHoverOprPreview();
         return next;

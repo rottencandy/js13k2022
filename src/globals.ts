@@ -1,5 +1,6 @@
 import { createGLContext } from './engine/webgl2';
 import Camera from './engine/cam';
+import { Keys } from './engine/input';
 
 export const GAME_WIDTH = 640;
 export const GAME_HEIGHT = 360;
@@ -26,4 +27,28 @@ export const
 export const CTX = createGLContext(document.getElementById('c') as HTMLCanvasElement, GAME_WIDTH, GAME_HEIGHT);
 (window.onresize = CTX.resize_)();
 
-export const CAM = Camera(radians(45), 1, 400, 640/360).move_(-4,4,-10).recalculate_();
+export const CAM = Camera(radians(45), 1, 400, 640 / 360).move_(-4, 4, -10).recalculate_();
+
+
+export const CursorGridPos = {
+    x: 0,
+    y: 0,
+    isInRange: false,
+};
+
+export const calcCursorGridPos = () => {
+    const ptrXPos = 0.228;
+    const ptrYPos = 0.985;
+    const ptrWidth = 0.068;
+    const ptrHeight = 0.122;
+
+    CursorGridPos.isInRange = false;
+    if (Keys.ptrX_ < ptrXPos && Keys.ptrY_ > ptrYPos) return;
+    const xPos = Math.floor((Keys.ptrX_ - ptrXPos) / ptrWidth);
+    const yPos = Math.floor(((1 - Keys.ptrY_) - (1 - ptrYPos)) / ptrHeight);
+    if (xPos >= 0 && xPos < GRID_WIDTH && yPos >= 0 && yPos < GRID_HEIGHT) {
+        CursorGridPos.x = xPos;
+        CursorGridPos.y = yPos;
+        CursorGridPos.isInRange = true;
+    }
+};
