@@ -24,15 +24,19 @@ type StateObject = {
  */
 export const createStateMachine = (states: StateObject, initial: string | number) => {
     let current = states[initial];
-    return {
+    const thisObj = {
+        state: initial,
         run: (...data: any[]) => {
             const next = current(...data);
             if (typeof next === 'function') {
                 current = next;
             } else if (next !== undefined) {
                 current = states[next];
+                thisObj.state = next;
             }
         },
         reset: (state: string | number) => current = states[state],
     };
+
+    return thisObj;
 }
