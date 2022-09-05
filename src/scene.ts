@@ -16,7 +16,7 @@ const sm = createStateMachine({
         const next = readStateBtns(SceneState.Editing);
         calcCursorGridPos();
         readOprBtns();
-        calcHoverOprPreview();
+        checkGridUpdates();
         return next;
     },
     [SceneState.Running]: (dt: number) => {

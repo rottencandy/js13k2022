@@ -1,5 +1,5 @@
 import { Keys } from '../engine/input';
-import { GRID_HEIGHT, GRID_WIDTH } from '../globals';
+import { CursorGridPos } from '../globals';
 import { createRectTex } from '../rect';
 import { SceneState } from '../scene';
 import { makeTextTex } from '../text';
@@ -24,17 +24,9 @@ type Operator = {
 // }}}
 
 const BeltOperators: Operator[] = [];
-let selectedOperator = {
-    type: OperatorType.Belt,
-    x: 0,
-    y: 0,
+const State = {
+    selectedOperator: OperatorType.Belt,
 };
-
-// used for drawing shadow operator pos
-const ptrXPos = 0.228;
-const ptrYPos = 0.985;
-const ptrWidth = 0.068;
-const ptrHeight = 0.122;
 
 // Utils {{{
 
@@ -54,20 +46,27 @@ export const getOperatorIntent = (x: number, y: number): Direction => {
 
 // Update {{{
 
-const spawnOperator = (x: number, y: number, type: OperatorType, dir: Direction) =>
-    BeltOperators.push({ x, y, type, dir });
+const spawnOperator = (x: number, y: number, type: OperatorType, dir: Direction) => {
+    const opr = { x, y, type, dir };
+    switch (type) {
+        case OperatorType.Belt:
+            BeltOperators.push(opr);
+            break;
+    }
+}
 
 export const setSelectedOpr = (o: OperatorType) => {
-    selectedOperator.type = o;
+    State.selectedOperator = o;
 };
 
-export const calcHoverOprPreview = () => {
-    if (Keys.ptrX_ < ptrXPos && Keys.ptrY_ > ptrYPos) return;
-    const xPos = Math.floor((Keys.ptrX_ - ptrXPos) / ptrWidth);
-    const yPos = Math.floor(((1 - Keys.ptrY_) - (1 - ptrYPos)) / ptrHeight);
-    if (xPos >= 0 && xPos < GRID_WIDTH && yPos >= 0 && yPos < GRID_HEIGHT) {
-        selectedOperator.x = xPos;
-        selectedOperator.y = yPos;
+export const checkGridUpdates = () => {
+    if (CursorGridPos.isInRange && Keys.justClicked_) {
+        spawnOperator(
+            CursorGridPos.x,
+            CursorGridPos.y,
+            State.selectedOperator,
+            Direction.Top
+        );
     }
 };
 
@@ -104,8 +103,8 @@ export const update = (dt: number) => {
 export const render = (state: SceneState) => {
     BeltOperators.map(drawOperator);
     if (state === SceneState.Editing) {
-        const ctx = operatorTypeCtx(selectedOperator.type);
-        ctx.use_().draw_(selectedOperator.x, selectedOperator.y, -0.01);
+        const ctx = operatorTypeCtx(State.selectedOperator);
+        ctx.use_().draw_(CursorGridPos.x, CursorGridPos.y, -0.01);
     }
 };
 
