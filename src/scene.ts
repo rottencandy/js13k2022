@@ -1,7 +1,7 @@
-import { update as panelUpdate, render as panelRender, readStateBtns } from './entities/panel';
+import { update as panelUpdate, render as panelRender, readStateBtns, readOprBtns } from './entities/panel';
 import { render as bgRender } from './entities/backdrop';
 import { update as objectsUpdate, render as objectsRender } from './entities/objects';
-import { update as operatorsUpdate, render as operatorsRender } from './entities/operators';
+import { update as operatorsUpdate, render as operatorsRender, drawSelectedOprShadow } from './entities/operators';
 import { createStateMachine } from './engine/state';
 
 export const enum SceneState {
@@ -13,6 +13,7 @@ export const enum SceneState {
 const sm = createStateMachine({
     [SceneState.Editing]: () => {
         const next = readStateBtns(SceneState.Editing);
+        readOprBtns();
         return next;
     },
     [SceneState.Running]: (dt: number) => {
@@ -35,6 +36,7 @@ export const update = (dt: number) => {
 export const render = () => {
     bgRender();
     panelRender();
+    sm.state === SceneState.Editing && drawSelectedOprShadow();
     operatorsRender();
     objectsRender();
 };

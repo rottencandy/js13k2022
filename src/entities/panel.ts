@@ -3,6 +3,7 @@ import { makeTextTex } from '../text';
 import rectFrag from '../shaders/panel.frag';
 import { Keys } from '../engine/input';
 import { SceneState } from '../scene';
+import { OperatorType, operatorTypeCtx } from './operators';
 
 let bg = createShadedRect(rectFrag, 3.7, 8.5);
 const selectorCtx = createRectTex(makeTextTex('⛶', 100));
@@ -16,13 +17,22 @@ const state = {
     scale: {
         btn1: 1,
         btn2: 1,
+        [OperatorType.Belt]: 1,
     },
+    selectedOpr: OperatorType.Belt,
 };
 // todo: lerped hover size
 const BTN_HOVER_SIZE = 1.2;
+const OPR_HOVER_SIZE = 1.1;
+
+const Operators = {
+    [OperatorType.Belt]: operatorTypeCtx(OperatorType.Belt),
+};
 
 const btn1Pos = { x: 0.027, y: 0.075 };
 const btn2Pos = { x: 0.096, y: 0.075 };
+const oprBtnPos = { x: 0.069, y: 0.26 };
+// todo: hardcode btn size in isPtrInBounds
 const btnHeight = 0.125;
 const btnWidth = 0.069;
 
@@ -52,6 +62,17 @@ export const readStateBtns = (prevState: SceneState) => {
         }
     } else state.scale.btn2 = 1;
 };
+
+export const readOprBtns = () => {
+    if (Keys.ptrX_ > 0.205 || Keys.ptrY_ < 0.25) return;
+    Object.keys(Operators).map((o, i) => {
+        if (isPtrInBounds(oprBtnPos.x, oprBtnPos.y + i * btnHeight, btnWidth, btnHeight)) {
+            state.scale[o] = OPR_HOVER_SIZE;
+            if (Keys.justClicked_) state.selectedOpr = o as unknown as OperatorType;
+        } else {
+            state.scale[o] = 1;
+        }
+    });
 };
 
 export const update = (dt: number) => {
@@ -65,4 +86,11 @@ export const render = () => {
         pauseBtn.use_().draw_(-2.9, 6.5, .11, state.scale.btn1);
     }
     stopBtn.use_().draw_(-1.9, 6.5, .11, state.scale.btn2);
+
+    Object.keys(Operators).map((o, i) => {
+        Operators[o].use_().draw_(-2.3, 5 - i, .11, state.scale[o]);
+        if (state.scene === SceneState.Editing && state.selectedOpr === o as unknown as OperatorType) {
+            selectorCtx.use_().draw_(-2.3, 5 - i, .11, 1.1);
+        }
+    });
 };
