@@ -19,6 +19,13 @@ const data = [F32([
 [0, 3, 2, 0, 2, 1]] as any;
 const mesh = CTX.createMesh_(data, [[0, 2]]);
 
+export const enum Angle {
+    a0 = 0,
+    a90 = 1.57079,
+    a180 = 3.14159,
+    a270 = 4.71238,
+}
+
 export const createRectTex = (tex: any) => {
     const sh = CTX.shader_(texVert, texFrag);
     sh.use_();
@@ -32,10 +39,11 @@ export const createRectTex = (tex: any) => {
             sh.use_();
             return thisObj;
         },
-        draw_(x: number, y: number, z: number, size = 1, opacity = 1) {
+        draw_(x: number, y: number, z: number, size = 1, opacity = 1, angle = Angle.a0) {
             uni`uPos`.u3f_(x,y,z);
             uni`uZoom`.u1f_(size);
             uni`uOpacity`.u1f_(opacity);
+            uni`uAng`.u1f_(angle);
             mesh.draw_();
             return thisObj;
         },
