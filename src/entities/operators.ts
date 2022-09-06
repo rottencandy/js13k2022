@@ -111,7 +111,7 @@ export const render = (state: SceneState) => {
     BeltOperators.map(drawOperator);
     if (state === SceneState.Editing && State.showHoverOpShadow) {
         const ctx = operatorTypeCtx(State.selectedOperator);
-        ctx.use_().draw_(CursorGridPos.x, CursorGridPos.y, -0.01);
+        ctx.use_().draw_(CursorGridPos.x, CursorGridPos.y, -0.01, 1, .7);
     }
 };
 
