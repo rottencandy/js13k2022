@@ -1,19 +1,11 @@
 import { createStateMachine } from '../engine/state';
 import { createTween, ticker } from '../engine/interpolation';
-import { createRectTex } from '../rect';
+import { createRectTex, Direction } from '../rect';
 import { makeTextTex } from '../text';
 import { getOperatorIntent, isObstaclePresent } from './operators';
 import { GRID_HEIGHT, GRID_WIDTH } from '../globals';
 
 // Types {{{
-
-export const enum Direction {
-    Top = 0,
-    Rgt = 1,
-    Btm = 2,
-    Lft = 3,
-    Non = 4,
-};
 
 const enum Type {
     FrozenFace,

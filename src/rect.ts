@@ -19,11 +19,14 @@ const data = [F32([
 [0, 3, 2, 0, 2, 1]] as any;
 const mesh = CTX.createMesh_(data, [[0, 2]]);
 
-export const enum Angle {
-    a0 = 0,
-    a90 = 1.57079,
-    a180 = 3.14159,
-    a270 = 4.71238,
+// reuse the direction enum as angles
+// the values are just angles in radians(except non)
+export const enum Direction {
+    Top = 0,
+    Rgt = 1.57079,
+    Btm = 3.14159,
+    Lft = 4.71238,
+    Non = 5,
 }
 
 export const createRectTex = (tex: any) => {
@@ -39,7 +42,7 @@ export const createRectTex = (tex: any) => {
             sh.use_();
             return thisObj;
         },
-        draw_(x: number, y: number, z: number, size = 1, opacity = 1, angle = Angle.a0) {
+        draw_(x: number, y: number, z: number, size = 1, opacity = 1, angle = Direction.Top) {
             uni`uPos`.u3f_(x,y,z);
             uni`uZoom`.u1f_(size);
             uni`uOpacity`.u1f_(opacity);
