@@ -26,6 +26,7 @@ type Operator = {
 const BeltOperators: Operator[] = [];
 const State = {
     selectedOperator: OperatorType.Belt,
+    showHoverOpShadow: false,
 };
 
 // Utils {{{
@@ -55,18 +56,24 @@ const spawnOperator = (x: number, y: number, type: OperatorType, dir: Direction)
     }
 }
 
-export const setSelectedOpr = (o: OperatorType) => {
-    State.selectedOperator = o;
-};
-
 export const checkGridUpdates = () => {
-    if (CursorGridPos.isInRange && Keys.justClicked_) {
-        spawnOperator(
-            CursorGridPos.x,
-            CursorGridPos.y,
-            State.selectedOperator,
-            Direction.Top
-        );
+    if (CursorGridPos.isInRange) {
+        State.showHoverOpShadow = true;
+        BeltOperators.find((o) => {
+            if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
+                return State.showHoverOpShadow = false;
+            }
+        });
+        if (Keys.justClicked_ && State.showHoverOpShadow) {
+            spawnOperator(
+                CursorGridPos.x,
+                CursorGridPos.y,
+                State.selectedOperator,
+                Direction.Top
+            );
+        }
+    } else {
+        State.showHoverOpShadow = false;
     }
 };
 
@@ -102,7 +109,7 @@ export const update = (dt: number) => {
 
 export const render = (state: SceneState) => {
     BeltOperators.map(drawOperator);
-    if (state === SceneState.Editing) {
+    if (state === SceneState.Editing && State.showHoverOpShadow) {
         const ctx = operatorTypeCtx(State.selectedOperator);
         ctx.use_().draw_(CursorGridPos.x, CursorGridPos.y, -0.01);
     }
