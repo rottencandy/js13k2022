@@ -1,9 +1,8 @@
 import { Keys } from '../engine/input';
 import { CursorGridPos } from '../globals';
-import { createRectTex } from '../rect';
+import { createRectTex, Direction } from '../rect';
 import { SceneState } from '../scene';
 import { makeTextTex } from '../text';
-import { Direction } from './objects';
 
 // Types {{{
 
@@ -99,7 +98,7 @@ export const operatorTypeCtx = (t: OperatorType) => {
 const drawOperator = (o: Operator) => {
     // todo: avoid using typeCtx here (optimize for use_)
     const ctx = operatorTypeCtx(o.type);
-    ctx.use_().draw_(o.x, o.y, -0.01);
+    ctx.use_().draw_(o.x, o.y, -0.01, 1, 1, o.dir);
 };
 
 // }}}
