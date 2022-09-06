@@ -95,10 +95,8 @@ export const operatorTypeCtx = (t: OperatorType) => {
     }
 };
 
-const drawOperator = (o: Operator) => {
-    // todo: avoid using typeCtx here (optimize for use_)
-    const ctx = operatorTypeCtx(o.type);
-    ctx.use_().draw_(o.x, o.y, -0.01, 1, 1, o.dir);
+const drawBeltOperator = (o: Operator) => {
+    beltCtx.draw_(o.x, o.y, -0.01, 1, 1, o.dir);
 };
 
 // }}}
@@ -107,7 +105,9 @@ export const update = (dt: number) => {
 };
 
 export const render = (state: SceneState) => {
-    BeltOperators.map(drawOperator);
+    beltCtx.use_();
+    BeltOperators.map(drawBeltOperator);
+
     if (state === SceneState.Editing && State.showHoverOpShadow) {
         const ctx = operatorTypeCtx(State.selectedOperator);
         ctx.use_().draw_(CursorGridPos.x, CursorGridPos.y, -0.01, 1, .7);
