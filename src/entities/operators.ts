@@ -1,6 +1,6 @@
 import { Keys } from '../engine/input';
 import { CursorGridPos } from '../globals';
-import { createRectTex, Direction } from '../rect';
+import { createRectTex, Direction, nextDir } from '../rect';
 import { SceneState } from '../scene';
 import { makeTextTex } from '../text';
 
@@ -26,6 +26,7 @@ const BeltOperators: Operator[] = [];
 const State = {
     selectedOperator: OperatorType.Belt,
     showHoverOpShadow: false,
+    showCellEditBtns: false,
 };
 
 // Utils {{{
@@ -58,9 +59,18 @@ const spawnOperator = (x: number, y: number, type: OperatorType, dir: Direction)
 export const checkGridUpdates = () => {
     if (CursorGridPos.isInRange) {
         State.showHoverOpShadow = true;
-        BeltOperators.find((o) => {
+        State.showCellEditBtns = true;
+        BeltOperators.find((o, i) => {
             if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
-                return State.showHoverOpShadow = false;
+                if (Keys.justClicked_) {
+                    if (CursorGridPos.leftHalf) {
+                        o.dir = nextDir(o.dir);
+                    } else {
+                        BeltOperators.splice(i, 1);
+                    }
+                }
+                State.showHoverOpShadow = false;
+                return State.showCellEditBtns = true;
             }
         });
         if (Keys.justClicked_ && State.showHoverOpShadow) {
@@ -85,6 +95,8 @@ spawnOperator(0, 1, OperatorType.Belt, Direction.Rgt);
 
 const beltCtx = createRectTex(makeTextTex('⏫', 100));
 const blockCtx = createRectTex(makeTextTex('⬛', 100));
+const rotateCtx = createRectTex(makeTextTex('↻', 170));
+const crossCtx = createRectTex(makeTextTex('×', 170));
 
 export const operatorTypeCtx = (t: OperatorType) => {
     switch (t) {
@@ -96,7 +108,15 @@ export const operatorTypeCtx = (t: OperatorType) => {
 };
 
 const drawBeltOperator = (o: Operator) => {
-    beltCtx.draw_(o.x, o.y, -0.01, 1, 1, o.dir);
+    beltCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
+    if (State.showCellEditBtns) {
+        if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
+            rotateCtx.use_().draw_(o.x - 0.2, o.y - 0.1, -0.01);
+            crossCtx.use_().draw_(o.x + 0.2, o.y - 0.2, -0.01);
+            // reset ctx so it can be used in next iters
+            beltCtx.use_();
+        }
+    }
 };
 
 // }}}
@@ -110,7 +130,7 @@ export const render = (state: SceneState) => {
 
     if (state === SceneState.Editing && State.showHoverOpShadow) {
         const ctx = operatorTypeCtx(State.selectedOperator);
-        ctx.use_().draw_(CursorGridPos.x, CursorGridPos.y, -0.01, 1, .7);
+        ctx.use_().draw_(CursorGridPos.x, CursorGridPos.y, -0.02, 1, .7);
     }
 };
 

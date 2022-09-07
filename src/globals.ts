@@ -34,21 +34,28 @@ export const CursorGridPos = {
     x: 0,
     y: 0,
     isInRange: false,
+    leftHalf: false,
 };
 
 export const calcCursorGridPos = () => {
     const ptrXPos = 0.228;
     const ptrYPos = 0.985;
-    const ptrWidth = 0.068;
-    const ptrHeight = 0.122;
+    const cellWidth = 0.068;
+    const cellHeight = 0.122;
 
     CursorGridPos.isInRange = false;
     if (Keys.ptrX_ < ptrXPos && Keys.ptrY_ > ptrYPos) return;
-    const xPos = Math.floor((Keys.ptrX_ - ptrXPos) / ptrWidth);
-    const yPos = Math.floor(((1 - Keys.ptrY_) - (1 - ptrYPos)) / ptrHeight);
+
+    const xBasePos = Keys.ptrX_ - ptrXPos;
+
+    const xPos = Math.floor(xBasePos / cellWidth);
+    const yPos = Math.floor(((1 - Keys.ptrY_) - (1 - ptrYPos)) / cellHeight);
+    const leftHalf = xBasePos % cellWidth < cellWidth / 2;
+
     if (xPos >= 0 && xPos < GRID_WIDTH && yPos >= 0 && yPos < GRID_HEIGHT) {
         CursorGridPos.x = xPos;
         CursorGridPos.y = yPos;
         CursorGridPos.isInRange = true;
+        CursorGridPos.leftHalf = leftHalf;
     }
 };

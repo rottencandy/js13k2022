@@ -29,6 +29,20 @@ export const enum Direction {
     Non = 5,
 }
 
+// return next clockwise rotated direction
+export const nextDir = (d: Direction) => {
+    switch (d) {
+        case Direction.Top:
+            return Direction.Rgt;
+        case Direction.Rgt:
+            return Direction.Btm;
+        case Direction.Btm:
+            return Direction.Lft;
+        case Direction.Lft:
+            return Direction.Top;
+    }
+}
+
 export const createRectTex = (tex: any) => {
     const sh = CTX.shader_(texVert, texFrag);
     sh.use_();
@@ -43,7 +57,7 @@ export const createRectTex = (tex: any) => {
             return thisObj;
         },
         draw_(x: number, y: number, z: number, size = 1, opacity = 1, angle = Direction.Top) {
-            uni`uPos`.u3f_(x,y,z);
+            uni`uPos`.u3f_(x, y, z);
             uni`uZoom`.u1f_(size);
             uni`uOpacity`.u1f_(opacity);
             uni`uAng`.u1f_(angle);
@@ -68,7 +82,7 @@ export const createShadedRect = (frag: string, width = 1, height = width) => {
             return thisObj;
         },
         draw_(x: number, y: number, z: number) {
-            uni`uPos`.u3f_(x,y,z);
+            uni`uPos`.u3f_(x, y, z);
             mesh.draw_();
             return thisObj;
         },
