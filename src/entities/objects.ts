@@ -1,5 +1,3 @@
-import { createStateMachine } from '../engine/state';
-import { createTween, ticker } from '../engine/interpolation';
 import { createRectTex, Direction } from '../rect';
 import { makeTextTex } from '../text';
 import { getOperatorIntent, isObstaclePresent } from './operators';
@@ -31,7 +29,6 @@ type ObjGroup = {
 // }}}
 
 const ObjGroups: ObjGroup[] = [];
-const moveTween = createTween(0, 1, 900);
 
 // Render {{{
 
@@ -45,7 +42,7 @@ const setupTypeCtx = (t: Type) => {
     }
 };
 
-const drawLerpedGroup = (grp: ObjGroup) => {
+const drawLerpedGroup = (grp: ObjGroup, tweenAmt: number) => {
     let baseX = grp.x, baseY = grp.y;
     switch (grp.next) {
         case Direction.Non:
@@ -53,16 +50,16 @@ const drawLerpedGroup = (grp: ObjGroup) => {
         case Direction.Top:
             // this works out when moveTween isn't active
             // because tweens are reset to 0 when done
-            baseY += moveTween.val;
+            baseY += tweenAmt;
             break;
         case Direction.Rgt:
-            baseX += moveTween.val;
+            baseX += tweenAmt;
             break;
         case Direction.Btm:
-            baseY -= moveTween.val;
+            baseY -= tweenAmt;
             break;
         case Direction.Lft:
-            baseX -= moveTween.val;
+            baseX -= tweenAmt;
     }
     const ctx = setupTypeCtx(grp.type);
     grp.grid.map(
@@ -75,13 +72,6 @@ const drawLerpedGroup = (grp: ObjGroup) => {
 // }}}
 
 // Update {{{
-
-const waitTicker = ticker(900);
-
-const enum State {
-    Idle,
-    Moving,
-};
 
 /* assuming groups are safely touching, not overlapping,  and share same type */
 const mergeGroups = (groups: ObjGroup[]): ObjGroup => {
@@ -305,26 +295,17 @@ const updatePos = (o: ObjGroup) => {
     o.next = Direction.Non;
 };
 
-const sm = createStateMachine({
-    [State.Idle]: (dt) => {
-        if (waitTicker(dt)) {
-            ObjGroups.map(setOperatorIntents);
-            ObjGroups.map((g) => {
-                calcNextMove(g, g.intent, ObjGroups);
-                checkedGroups = [];
-            });
-            return State.Moving;
-        };
-    },
-    [State.Moving]: (dt) => {
-        moveTween.step(dt);
-        if (moveTween.done) {
-            moveTween.reset();
-            ObjGroups.map(updatePos);
-            return State.Idle;
-        };
-    },
-}, State.Idle);
+export const prepareNextStep = () => {
+    ObjGroups.map(setOperatorIntents);
+    ObjGroups.map((g) => {
+        calcNextMove(g, g.intent, ObjGroups);
+        checkedGroups = [];
+    });
+};
+
+export const endCurrentStep = () => {
+    ObjGroups.map(updatePos);
+};
 
 // }}}
 
@@ -459,12 +440,8 @@ console.log(
 
 // }}}
 
-export const update = (dt: number) => {
-    sm.run(dt);
-};
-
-export const render = () => {
-    ObjGroups.map(drawLerpedGroup);
+export const render = (tweenAmt: number) => {
+    ObjGroups.map((o) => drawLerpedGroup(o, tweenAmt));
 };
 
 // vim: fdm=marker:fdl=0:

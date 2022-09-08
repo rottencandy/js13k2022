@@ -1,9 +1,10 @@
 import { update as panelUpdate, render as panelRender, readStateBtns, readOprBtns } from './entities/panel';
 import { render as bgRender } from './entities/backdrop';
-import { update as objectsUpdate, render as objectsRender } from './entities/objects';
-import { update as operatorsUpdate, render as operatorsRender, checkGridUpdates } from './entities/operators';
+import { render as objectsRender, prepareNextStep, endCurrentStep } from './entities/objects';
+import { render as operatorsRender, checkGridUpdates } from './entities/operators';
 import { createStateMachine } from './engine/state';
 import { calcCursorGridPos } from './globals';
+import { createTween, ticker } from './engine/interpolation';
 
 export const enum SceneState {
     Editing = 1,
@@ -11,7 +12,31 @@ export const enum SceneState {
     Paused,
 };
 
-const sm = createStateMachine({
+const enum StepState {
+    Idle,
+    Moving,
+};
+
+const waitTicker = ticker(900);
+const stepTween = createTween(0, 1, 900);
+const stepState = createStateMachine({
+    [StepState.Idle]: (dt) => {
+        if (waitTicker(dt)) {
+            prepareNextStep();
+            return StepState.Moving;
+        };
+    },
+    [StepState.Moving]: (dt) => {
+        stepTween.step(dt);
+        if (stepTween.done) {
+            stepTween.reset();
+            endCurrentStep();
+            return StepState.Idle;
+        };
+    },
+}, StepState.Idle);
+
+const sceneState = createStateMachine({
     [SceneState.Editing]: () => {
         const next = readStateBtns(SceneState.Editing);
         calcCursorGridPos();
@@ -20,7 +45,7 @@ const sm = createStateMachine({
         return next;
     },
     [SceneState.Running]: (dt: number) => {
-        objectsUpdate(dt);
+        stepState.run(dt);
         const next = readStateBtns(SceneState.Running);
         return next;
     },
@@ -31,14 +56,13 @@ const sm = createStateMachine({
 }, SceneState.Editing);
 
 export const update = (dt: number) => {
-    sm.run(dt);
+    sceneState.run(dt);
     panelUpdate(dt);
-    operatorsUpdate(dt);
 };
 
 export const render = () => {
     bgRender();
     panelRender();
-    operatorsRender(sm.state as SceneState);
-    objectsRender();
+    operatorsRender(sceneState.state as SceneState);
+    objectsRender(stepTween.val);
 };
