@@ -83,6 +83,7 @@ export const checkGridUpdates = () => {
         }
     } else {
         State.showHoverOpShadow = false;
+        State.showCellEditBtns = false;
     }
 };
 
