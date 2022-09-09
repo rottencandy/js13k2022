@@ -6,7 +6,7 @@ export const makeTextTex = (text: string, size: number) => {
   const ctx2d = canvas.getContext('2d');
   canvas.width  = size;
   canvas.height = size;
-  ctx2d.font = '100px monospace';
+  ctx2d.font = '90px e';
   ctx2d.textAlign = 'center';
   ctx2d.textBaseline = 'middle';
   ctx2d.fillStyle = 'white';

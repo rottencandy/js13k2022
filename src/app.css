@@ -16,6 +16,12 @@ div {
     font-size: 7vw;
 }
 
+/* https://xem.github.io/unicode13/emoji.html */
+@font-face {
+    font-family: e;
+    src: url(https://xem.github.io/unicode13/Twemoji.ttf) format('truetype');
+}
+
 /* Container div */
 #a {
     position: relative;
