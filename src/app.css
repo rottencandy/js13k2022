@@ -12,6 +12,10 @@ html, body {
     text-align: center;
 }
 
+div {
+    font-size: 7vw;
+}
+
 /* Container div */
 #a {
     position: relative;
@@ -55,7 +59,7 @@ html, body {
 
 /* Runtime created elements */
 #title {
-    margin: 3.5rem auto;
+    margin: 10vh auto;
 }
 
 #start {
