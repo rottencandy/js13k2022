@@ -69,7 +69,13 @@ export const checkGridUpdates = () => {
     if (CursorGridPos.isInRange) {
         State.showHoverOpShadow = true;
         State.showCellEditBtns = true;
-        BeltOperators.find((o, i) => {
+        SpawnerOperators.some(o => {
+            if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
+                State.showHoverOpShadow = false;
+                return true;
+            }
+        });
+        BeltOperators.some((o, i) => {
             if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
                 if (Keys.justClicked_) {
                     if (CursorGridPos.leftHalf) {
