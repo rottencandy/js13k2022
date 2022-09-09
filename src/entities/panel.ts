@@ -32,7 +32,6 @@ const OPR_HOVER_SIZE = 1.1;
 const btn1Pos = { x: 0.027, y: 0.075 };
 const btn2Pos = { x: 0.096, y: 0.075 };
 const oprBtnPos = { x: 0.069, y: 0.26 };
-// todo: hardcode btn size in isPtrInBounds
 const btnHeight = 0.125;
 const btnWidth = 0.069;
 
@@ -41,7 +40,6 @@ const isPtrInBounds = (bx: number, by: number, width: number, height: number) =>
 }
 
 export const readStateBtns = (prevState: SceneState) => {
-    // todo: update this prop below
     state.scene = prevState;
     // outside panel
     if (Keys.ptrX_ > 0.205) return;
@@ -49,16 +47,15 @@ export const readStateBtns = (prevState: SceneState) => {
     if (isPtrInBounds(btn1Pos.x, btn1Pos.y, btnWidth, btnHeight)) {
         state.scale.btn1 = BTN_HOVER_SIZE;
         if (Keys.justClicked_) {
-            if (state.paused = !state.paused) return SceneState.Paused;
-            else return SceneState.Running;
+            if (state.paused = !state.paused) return state.scene = SceneState.Paused;
+            else return state.scene = SceneState.Running;
         }
     } else state.scale.btn1 = 1;
     if (isPtrInBounds(btn2Pos.x, btn2Pos.y, btnWidth, btnHeight)) {
         state.scale.btn2 = BTN_HOVER_SIZE;
         if (Keys.justClicked_) {
             state.paused = true;
-            // todo: change state
-            return SceneState.Editing;
+            return state.scene = SceneState.Editing;
         }
     } else state.scale.btn2 = 1;
 };
