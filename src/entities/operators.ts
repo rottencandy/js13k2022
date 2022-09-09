@@ -136,7 +136,7 @@ export const operatorTypeCtx = (t: OperatorType) => {
 };
 
 const drawSpawner = (o: Operator) => {
-    spawnerCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
+    spawnerCtx.draw_(o.x, o.y, -0.01, 1, 1, o.dir);
 };
 
 const drawBeltOperator = (o: Operator) => {
