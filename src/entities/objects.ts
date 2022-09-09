@@ -100,7 +100,15 @@ const mergeGroups = (groups: ObjGroup[]): ObjGroup => {
 };
 
 const spawnObjectGroup = (x: number, y: number, intent = Direction.Non, type = Type.Face): ObjGroup =>
-    ({ x, y, grid: [[Opt.Some, Opt.Some]], intent, next: Direction.Non, type });
+    ({ x, y, grid: [[Opt.Some]], intent, next: Direction.Non, type });
+
+export const spawnThawedObject = (x: number, y: number, dir: Direction) => {
+    ObjGroups.push(spawnObjectGroup(x, y, dir));
+};
+
+export const isCellEmpty = (x: number, y: number) => {
+    return !ObjGroups.find(g => g.x === x && g.y === y);
+};
 
 const gWidth = (o: ObjGroup) => o.grid[0].length;
 const gHeight = (o: ObjGroup) => o.grid.length;
@@ -311,8 +319,6 @@ export const endCurrentStep = () => {
 
 // so called "tests" {{{
 
-ObjGroups.push(spawnObjectGroup(0, 0));
-ObjGroups.push(spawnObjectGroup(0, 1));
 console.log(mergeGroups([spawnObjectGroup(0, 0), spawnObjectGroup(0, 1)]));
 console.log(splitGroup(
     {

@@ -1,7 +1,7 @@
 import { update as panelUpdate, render as panelRender, readStateBtns, readOprBtns } from './entities/panel';
 import { render as bgRender } from './entities/backdrop';
 import { render as objectsRender, prepareNextStep, endCurrentStep } from './entities/objects';
-import { render as operatorsRender, checkGridUpdates } from './entities/operators';
+import { render as operatorsRender, checkGridUpdates, trySpawn } from './entities/operators';
 import { createStateMachine } from './engine/state';
 import { calcCursorGridPos } from './globals';
 import { createTween, ticker } from './engine/interpolation';
@@ -17,11 +17,19 @@ const enum StepState {
     Moving,
 };
 
+const State = {
+    remainingSpawns: 5,
+};
+
 const waitTicker = ticker(900);
 const stepTween = createTween(0, 1, 900);
 const stepState = createStateMachine({
     [StepState.Idle]: (dt) => {
         if (waitTicker(dt)) {
+            if (State.remainingSpawns > 0) {
+                const spawnCount = trySpawn(State.remainingSpawns);
+                State.remainingSpawns -= spawnCount;
+            }
             prepareNextStep();
             return StepState.Moving;
         };

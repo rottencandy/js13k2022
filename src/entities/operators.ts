@@ -3,6 +3,7 @@ import { CursorGridPos } from '../globals';
 import { createRectTex, Direction, nextDir } from '../rect';
 import { SceneState } from '../scene';
 import { makeTextTex } from '../text';
+import { isCellEmpty, spawnThawedObject } from './objects';
 
 // Types {{{
 
@@ -23,6 +24,7 @@ type Operator = {
 // }}}
 
 const BeltOperators: Operator[] = [];
+const SpawnerOperators: Operator[] = [];
 const State = {
     selectedOperator: OperatorType.Belt,
     showHoverOpShadow: false,
@@ -32,11 +34,14 @@ const State = {
 // Utils {{{
 
 export const isObstaclePresent = (x: number, y: number) => {
-    return BeltOperators.find(o => o.x === x && o.y === y && o.type === OperatorType.Block);
+    return SpawnerOperators.some(o => o.x === x && o.y === y);
 };
 
 export const getOperatorIntent = (x: number, y: number): Direction => {
-    const op = BeltOperators.find(o => o.x === x && o.y === y);
+    let op = BeltOperators.find(o => o.x === x && o.y === y);
+    if (!op) {
+        op = SpawnerOperators.find(o => o.x === x && o.y === y);
+    }
     if (op) {
         return op.dir;
     }
@@ -53,8 +58,12 @@ const spawnOperator = (x: number, y: number, type: OperatorType, dir: Direction)
         case OperatorType.Belt:
             BeltOperators.push(opr);
             break;
+        case OperatorType.Spawner:
+            SpawnerOperators.push(opr);
+            break;
     }
 }
+spawnOperator(2, 2, OperatorType.Spawner, Direction.Rgt);
 
 export const checkGridUpdates = () => {
     if (CursorGridPos.isInRange) {
@@ -87,8 +96,17 @@ export const checkGridUpdates = () => {
     }
 };
 
-spawnOperator(0, 0, OperatorType.Belt, Direction.Top);
-spawnOperator(0, 1, OperatorType.Belt, Direction.Rgt);
+export const trySpawn = (count: number): number => {
+    let spawnCount = 0;
+    for (let i = 0; i < Math.min(count, SpawnerOperators.length); i++) {
+        const o = SpawnerOperators[i];
+        if (isCellEmpty(o.x, o.y)) {
+            spawnThawedObject(o.x, o.y, o.dir);
+            spawnCount++;
+        }
+    }
+    return spawnCount;
+};
 
 // }}}
 
@@ -96,6 +114,7 @@ spawnOperator(0, 1, OperatorType.Belt, Direction.Rgt);
 
 const beltCtx = createRectTex(makeTextTex('⏫', 100));
 const blockCtx = createRectTex(makeTextTex('⬛', 100));
+const spawnerCtx = createRectTex(makeTextTex('🔳', 100));
 const rotateCtx = createRectTex(makeTextTex('↻', 170));
 const crossCtx = createRectTex(makeTextTex('×', 170));
 
@@ -105,7 +124,13 @@ export const operatorTypeCtx = (t: OperatorType) => {
             return beltCtx;
         case OperatorType.Block:
             return blockCtx;
+        case OperatorType.Spawner:
+            return spawnerCtx;
     }
+};
+
+const drawSpawner = (o: Operator) => {
+    spawnerCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
 };
 
 const drawBeltOperator = (o: Operator) => {
@@ -122,12 +147,14 @@ const drawBeltOperator = (o: Operator) => {
 
 // }}}
 
-export const update = (dt: number) => {
-};
+//export const update = (dt: number) => {
+//};
 
 export const render = (state: SceneState) => {
     beltCtx.use_();
     BeltOperators.map(drawBeltOperator);
+    spawnerCtx.use_();
+    SpawnerOperators.map(drawSpawner);
 
     if (state === SceneState.Editing && State.showHoverOpShadow) {
         const ctx = operatorTypeCtx(State.selectedOperator);
