@@ -28,7 +28,7 @@ type ObjGroup = {
 
 // }}}
 
-const ObjGroups: ObjGroup[] = [];
+let ObjGroups: ObjGroup[] = [];
 
 // Render {{{
 
@@ -239,56 +239,66 @@ const willCollide = (g1: ObjGroup, dir1: Direction, g2: ObjGroup, dir2 = Directi
     return false;
 };
 
-// required to not recursively search indefinitely
-let checkedGroups: number[] = [];
-/* Sets the next for each group, and returns if it can end up moving */
-const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[]) => {
-    if (g.next !== Direction.Non) return g.next === dir;
+const isInRange = (g: ObjGroup, dir: Direction, g2: ObjGroup) => {
+    switch (dir) {
+        case Direction.Top:
+            return g2.y === g.y + gHeight(g) &&
+                (g2.x >= g.x - 1 && g2.x < g.x + gWidth(g) + 1 ||
+                    g2.x + gWidth(g2) >= g.x - 1 && g2.x + gWidth(g2) < g.x + gWidth(g) + 1);
+        case Direction.Btm:
+            return g2.y + gHeight(g2) === g.y &&
+                (g2.x >= g.x - 1 && g2.x < g.x + gWidth(g) + 1 ||
+                    g2.x + gWidth(g2) >= g.x - 1 && g2.x + gWidth(g2) < g.x + gWidth(g) + 1);
+        case Direction.Lft:
+            return g2.x + gWidth(g2) === g.x &&
+                (g2.y >= g.y - 1 && g2.y < g.y + gHeight(g) + 1 ||
+                    g2.y + gHeight(g2) <= g.y + gHeight(g) + 1 && g2.y > g.y - 1);
+        case Direction.Rgt:
+            return g2.x === g.x + gWidth(g) &&
+                (g2.y >= g.y - 1 && g2.y < g.y + gHeight(g) + 1 ||
+                    g2.y + gHeight(g2) <= g.y + gHeight(g) + 1 && g2.y > g.y - 1);
+    }
+}
+
+const checkMvt = (g: ObjGroup, dir: Direction, omitId: number) => {
+    if (dir === Direction.Non) return true;
+    if (g.next === dir) return true;
     const gnp = getNextGroupPos(g, dir);
     if (gnp.x > GRID_WIDTH || gnp.x < 0 || gnp.y > GRID_HEIGHT || gnp.y < 0) return false;
     if (checkObstacles(g, dir)) return false;
-
-    const blockingGroups = gs
+    return ObjGroups
         .filter((pg, id) => {
-            if (g.x === pg.x && g.y === pg.y) return false;
-            if (checkedGroups.includes(id)) return false;
-            checkedGroups.push(id);
-
-            // if not moving
-            if (pg.intent === Direction.Non) {
-                // and is being moved
-                if (pg.next !== Direction.Non) return willCollide(g, dir, pg, pg.next);
-
-                // and not being moved
-                if (!willCollide(g, dir, pg, pg.next)) return false;
-                // try to push
-                const canBePushed = calcNextMove(pg, dir, gs);
-                if (canBePushed) {
-                    pg.next = dir;
+            if (id === omitId) return false;
+            return isInRange(g, dir, pg);
+        })
+        .filter(pg => {
+            if (pg.intent === dir || pg.intent === Direction.Non) {
+                if (!willCollide(g, dir, pg)) return false;
+                const canMove = checkMvt(pg, dir, omitId);
+                if (canMove) {
+                    pg.next = pg.intent = dir;
                     return false;
-                } else return true;
-
-                // if wants to move
-            } else {
-                // is moving
-                if (calcNextMove(pg, pg.intent, gs)) {
-                    return willCollide(g, dir, pg, pg.next);
                 } else {
-                    // stopped but not in our way
-                    if (!willCollide(g, dir, pg, Direction.Non)) return false;
-                    // in our way, try to push
-                    if (calcNextMove(pg, dir, gs)) {
-                        pg.intent = dir;
+                    pg.next = pg.intent = Direction.Non;
+                    return true;
+                }
+            } else {
+                const canMove = checkMvt(pg, pg.intent, omitId);
+                if (canMove) {
+                    pg.next = pg.intent;
+                    return willCollide(g, dir, pg, pg.intent);
+                } else {
+                    const canPush = checkMvt(pg, dir, omitId);
+                    if (canPush) {
+                        pg.next = pg.intent = dir;
                         return false;
+                    } else {
+                        pg.next = pg.intent = Direction.Non;
+                        return willCollide(g, dir, pg);
                     }
                 }
             }
-        });
-    const canMove = blockingGroups.length === 0;
-    if (canMove) {
-        g.next = dir;
-    }
-    return canMove;
+        }).length === 0;
 };
 
 /* Also resets next dirs */
@@ -313,9 +323,13 @@ const updatePos = (o: ObjGroup) => {
 
 export const prepareNextStep = () => {
     ObjGroups.map(setOperatorIntents);
-    ObjGroups.map((g) => {
-        calcNextMove(g, g.intent, ObjGroups);
-        checkedGroups = [];
+    ObjGroups.map((g, id) => {
+        const canMove = checkMvt(g, g.intent, id);
+        if (canMove) {
+            g.next = g.intent;
+        } else {
+            g.next = Direction.Non;
+        }
     });
 };
 
@@ -454,7 +468,7 @@ console.log(
         Direction.Top,
         spawnObjectGroup(0, 1),
         Direction.Rgt
-    ) === true);
+    ) === false);
 
 // }}}
 
