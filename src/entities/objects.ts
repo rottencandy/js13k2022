@@ -260,21 +260,22 @@ const isInRange = (g: ObjGroup, dir: Direction, g2: ObjGroup) => {
     }
 }
 
-const checkMvt = (g: ObjGroup, dir: Direction, omitId: number) => {
+const checkMvt = (g: ObjGroup, dir: Direction, omitIds: number[]) => {
     if (dir === Direction.Non) return true;
     if (g.next === dir) return true;
     const gnp = getNextGroupPos(g, dir);
     if (gnp.x > GRID_WIDTH || gnp.x < 0 || gnp.y > GRID_HEIGHT || gnp.y < 0) return false;
     if (checkObstacles(g, dir)) return false;
-    return ObjGroups
+    const blockingGroups = ObjGroups
         .filter((pg, id) => {
-            if (id === omitId) return false;
-            return isInRange(g, dir, pg);
-        })
-        .filter(pg => {
+            if (g.x === pg.x && g.y === pg.y) return false;
+            if (omitIds.includes(id)) {
+                return willCollide(g, dir, pg, pg.intent);
+            }
+            if (!isInRange(g, dir, pg)) return false;
             if (pg.intent === dir || pg.intent === Direction.Non) {
                 if (!willCollide(g, dir, pg)) return false;
-                const canMove = checkMvt(pg, dir, omitId);
+                const canMove = checkMvt(pg, dir, [...omitIds, id]);
                 if (canMove) {
                     pg.next = pg.intent = dir;
                     return false;
@@ -283,12 +284,13 @@ const checkMvt = (g: ObjGroup, dir: Direction, omitId: number) => {
                     return true;
                 }
             } else {
-                const canMove = checkMvt(pg, pg.intent, omitId);
+                const canMove = checkMvt(pg, pg.intent, [...omitIds, id]);
                 if (canMove) {
                     pg.next = pg.intent;
                     return willCollide(g, dir, pg, pg.intent);
                 } else {
-                    const canPush = checkMvt(pg, dir, omitId);
+                    if (!willCollide(g, dir, pg)) return false;
+                    const canPush = checkMvt(pg, dir, [...omitIds, id]);
                     if (canPush) {
                         pg.next = pg.intent = dir;
                         return false;
@@ -298,7 +300,8 @@ const checkMvt = (g: ObjGroup, dir: Direction, omitId: number) => {
                     }
                 }
             }
-        }).length === 0;
+        });
+    return blockingGroups.length === 0;
 };
 
 /* Also resets next dirs */
@@ -324,7 +327,7 @@ const updatePos = (o: ObjGroup) => {
 export const prepareNextStep = () => {
     ObjGroups.map(setOperatorIntents);
     ObjGroups.map((g, id) => {
-        const canMove = checkMvt(g, g.intent, id);
+        const canMove = checkMvt(g, g.intent, [id]);
         if (canMove) {
             g.next = g.intent;
         } else {
