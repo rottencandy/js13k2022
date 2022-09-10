@@ -251,27 +251,32 @@ const calcNextMove = (g: ObjGroup, dir: Direction, gs: ObjGroup[]) => {
     const blockingGroups = gs
         .filter((pg, id) => {
             if (g.x === pg.x && g.y === pg.y) return false;
-            // todo: Is checking only intent here sufficient?
-            if (!willCollide(g, dir, pg, pg.intent)) return false;
             if (checkedGroups.includes(id)) return false;
             checkedGroups.push(id);
 
+            // if not moving
             if (pg.intent === Direction.Non) {
+                // and is being moved
                 if (pg.next !== Direction.Non) return willCollide(g, dir, pg, pg.next);
 
+                // and not being moved
+                if (!willCollide(g, dir, pg, pg.next)) return false;
+                // try to push
                 const canBePushed = calcNextMove(pg, dir, gs);
                 if (canBePushed) {
                     pg.next = dir;
                     return false;
                 } else return true;
 
+                // if wants to move
             } else {
-                if (pg.next === pg.intent) return true;
-
-                const isMoving = calcNextMove(pg, pg.intent, gs);
-                if (isMoving) {
+                // is moving
+                if (calcNextMove(pg, pg.intent, gs)) {
                     return willCollide(g, dir, pg, pg.next);
                 } else {
+                    // stopped but not in our way
+                    if (!willCollide(g, dir, pg, Direction.Non)) return false;
+                    // in our way, try to push
                     if (calcNextMove(pg, dir, gs)) {
                         pg.intent = dir;
                         return false;
