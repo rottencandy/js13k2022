@@ -29,6 +29,7 @@ const State = {
     selectedOperator: OperatorType.Belt,
     showHoverOpShadow: false,
     showCellEditBtns: false,
+    lastEditPos: { x: -5, y: -5 },
 };
 
 // Utils {{{
@@ -143,31 +144,28 @@ export const operatorTypeCtx = (t: OperatorType) => {
 };
 
 const drawSpawner = (o: Operator) => {
-    spawnerCtx.draw_(o.x, o.y, -0.01, 1, 1, o.dir);
+    spawnerCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
 };
 
 const drawBeltOperator = (o: Operator) => {
     beltCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
-    if (State.showCellEditBtns) {
-        if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
-            rotateCtx.use_().draw_(o.x - 0.2, o.y - 0.1, -0.01);
-            crossCtx.use_().draw_(o.x + 0.2, o.y - 0.2, -0.01);
-            // reset ctx so it can be used in next iters
-            beltCtx.use_();
-        }
+    if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
+        State.lastEditPos.x = o.x;
+        State.lastEditPos.y = o.y;
     }
 };
 
 // }}}
-
-//export const update = (dt: number) => {
-//};
 
 export const render = (state: SceneState) => {
     beltCtx.use_();
     BeltOperators.map(drawBeltOperator);
     spawnerCtx.use_();
     SpawnerOperators.map(drawSpawner);
+    if (State.showCellEditBtns) {
+        rotateCtx.use_().draw_(State.lastEditPos.x - 0.2, State.lastEditPos.y - 0.1, -0.01);
+        crossCtx.use_().draw_(State.lastEditPos.x + 0.2, State.lastEditPos.y - 0.2, -0.01);
+    }
 
     if (state === SceneState.Editing && State.showHoverOpShadow) {
         const ctx = operatorTypeCtx(State.selectedOperator);
