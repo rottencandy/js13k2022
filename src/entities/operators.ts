@@ -162,14 +162,15 @@ export const render = (state: SceneState) => {
     BeltOperators.map(drawBeltOperator);
     spawnerCtx.use_();
     SpawnerOperators.map(drawSpawner);
-    if (State.showCellEditBtns) {
-        rotateCtx.use_().draw_(State.lastEditPos.x - 0.2, State.lastEditPos.y - 0.1, -0.01);
-        crossCtx.use_().draw_(State.lastEditPos.x + 0.2, State.lastEditPos.y - 0.2, -0.01);
-    }
-
-    if (state === SceneState.Editing && State.showHoverOpShadow) {
-        const ctx = operatorTypeCtx(State.selectedOperator);
-        ctx.use_().draw_(CursorGridPos.x, CursorGridPos.y, -0.02, 1, .7);
+    if (state === SceneState.Editing) {
+        if (State.showHoverOpShadow) {
+            const ctx = operatorTypeCtx(State.selectedOperator);
+            ctx.use_().draw_(CursorGridPos.x, CursorGridPos.y, -0.02, 1, .7);
+        }
+        if (State.showCellEditBtns) {
+            rotateCtx.use_().draw_(State.lastEditPos.x - 0.2, State.lastEditPos.y - 0.1, -0.01);
+            crossCtx.use_().draw_(State.lastEditPos.x + 0.2, State.lastEditPos.y - 0.2, -0.01);
+        }
     }
 };
 

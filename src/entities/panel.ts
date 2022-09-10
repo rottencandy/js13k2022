@@ -20,6 +20,7 @@ setTimeout(() => {
     Operators = {
         [OperatorType.Belt]: operatorTypeCtx(OperatorType.Belt),
     };
+    state.selectedOpr = Object.keys(Operators)[0];
 }, 100);
 
 const state = {
