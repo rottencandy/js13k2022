@@ -202,7 +202,7 @@ const checkObstacles = (g: ObjGroup, dir: Direction) => {
         case Direction.Top:
             return g.grid[0].some((e, i) => e === Opt.Some && isObstaclePresent(g.x + i, g.y + 1))
         case Direction.Btm:
-            return g.grid[g.grid.length - 1].some((e, i) => e === Opt.Some && isObstaclePresent(g.x + i, g.y + g.grid.length))
+            return g.grid[g.grid.length - 1].some((e, i) => e === Opt.Some && isObstaclePresent(g.x + i, g.y - g.grid.length))
         case Direction.Rgt:
             return g.grid.some((e, i) => e[g.grid[0].length - 1] === Opt.Some && isObstaclePresent(g.x + g.grid[0].length, g.y + i))
         case Direction.Lft:
