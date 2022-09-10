@@ -323,6 +323,10 @@ export const endCurrentStep = () => {
     ObjGroups.map(updatePos);
 };
 
+export const clearGroups = () => {
+    ObjGroups = [];
+}
+
 // }}}
 
 // so called "tests" {{{
