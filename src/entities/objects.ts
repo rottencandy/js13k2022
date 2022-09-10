@@ -32,7 +32,10 @@ const ObjGroups: ObjGroup[] = [];
 
 // Render {{{
 
-const objCtx = createRectTex(makeTextTex('🥳', 120));
+let objCtx = null;
+setTimeout(() => {
+    objCtx = createRectTex(makeTextTex('🥳', 120));
+}, 100);
 
 const setupTypeCtx = (t: Type) => {
     switch (t) {

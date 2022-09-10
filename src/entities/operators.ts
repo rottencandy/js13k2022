@@ -118,11 +118,18 @@ export const trySpawn = (count: number): number => {
 
 // Render {{{
 
-const beltCtx = createRectTex(makeTextTex('⏫', 100));
-const blockCtx = createRectTex(makeTextTex('⬛', 100));
-const spawnerCtx = createRectTex(makeTextTex('🔳', 100));
-const rotateCtx = createRectTex(makeTextTex('↻', 170));
-const crossCtx = createRectTex(makeTextTex('×', 170));
+let beltCtx = null;
+let blockCtx = null;
+let spawnerCtx = null;
+let rotateCtx = null;
+let crossCtx = null;
+setTimeout(() => {
+    beltCtx = createRectTex(makeTextTex('⏫', 100));
+    blockCtx = createRectTex(makeTextTex('⬛', 100));
+    spawnerCtx = createRectTex(makeTextTex('🔳', 100));
+    rotateCtx = createRectTex(makeTextTex('↻', 170));
+    crossCtx = createRectTex(makeTextTex('×', 170));
+}, 100);
 
 export const operatorTypeCtx = (t: OperatorType) => {
     switch (t) {

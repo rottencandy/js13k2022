@@ -2,9 +2,9 @@ import { startLoop } from './engine/loop';
 import { showTitle } from './ui';
 import { update, render } from './game';
 
-startLoop(
+setTimeout(() => startLoop(
     update,
     render,
-);
+), 150);
 
 showTitle();

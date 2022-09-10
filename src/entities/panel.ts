@@ -6,14 +6,21 @@ import { SceneState } from '../scene';
 import { OperatorType, operatorTypeCtx } from './operators';
 
 let bg = createShadedRect(rectFrag, 3.7, 8.5);
-const selectorCtx = createRectTex(makeTextTex('⛶', 100));
-const playBtn = createRectTex(makeTextTex('▶', 100));
-const pauseBtn = createRectTex(makeTextTex('⏸', 100));
-const stopBtn = createRectTex(makeTextTex('⏹', 100));
+let selectorCtx = null;
+let playBtn = null;
+let pauseBtn = null;
+let stopBtn = null;
+let Operators = {};
+setTimeout(() => {
+    selectorCtx = createRectTex(makeTextTex('⛶', 100));
+    playBtn = createRectTex(makeTextTex('▶', 100));
+    pauseBtn = createRectTex(makeTextTex('⏸', 100));
+    stopBtn = createRectTex(makeTextTex('⏹', 100));
 
-const Operators = {
-    [OperatorType.Belt]: operatorTypeCtx(OperatorType.Belt),
-};
+    Operators = {
+        [OperatorType.Belt]: operatorTypeCtx(OperatorType.Belt),
+    };
+}, 100);
 
 const state = {
     paused: true,
