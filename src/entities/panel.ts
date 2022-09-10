@@ -4,7 +4,6 @@ import rectFrag from '../shaders/panel.frag';
 import { Keys } from '../engine/input';
 import { SceneState } from '../scene';
 import { OperatorType, operatorTypeCtx } from './operators';
-import { clearGroups } from './objects';
 
 let bg = createShadedRect(rectFrag, 3.7, 8.5);
 let selectorCtx = null;
@@ -64,7 +63,6 @@ export const readStateBtns = (prevState: SceneState) => {
         state.scale.btn2 = BTN_HOVER_SIZE;
         if (Keys.justClicked_) {
             state.paused = true;
-            clearGroups();
             return state.scene = SceneState.Editing;
         }
     } else state.scale.btn2 = 1;

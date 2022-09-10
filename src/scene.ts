@@ -1,6 +1,6 @@
 import { update as panelUpdate, render as panelRender, readStateBtns, readOprBtns } from './entities/panel';
 import { render as bgRender } from './entities/backdrop';
-import { render as objectsRender, prepareNextStep, endCurrentStep } from './entities/objects';
+import { render as objectsRender, prepareNextStep, endCurrentStep, clearGroups } from './entities/objects';
 import { render as operatorsRender, checkGridUpdates, trySpawn } from './entities/operators';
 import { createStateMachine } from './engine/state';
 import { calcCursorGridPos } from './globals';
@@ -17,8 +17,11 @@ const enum StepState {
     Moving,
 };
 
+// todo: read this from level data
+const REMAINING = 2;
+
 const State = {
-    remainingSpawns: 5,
+    remainingSpawns: REMAINING,
 };
 
 const waitTicker = ticker(900);
@@ -55,10 +58,18 @@ const sceneState = createStateMachine({
     [SceneState.Running]: (dt: number) => {
         stepState.run(dt);
         const next = readStateBtns(SceneState.Running);
+        if (next === SceneState.Editing) {
+            clearGroups();
+            State.remainingSpawns = REMAINING;
+        }
         return next;
     },
     [SceneState.Paused]: () => {
         const next = readStateBtns(SceneState.Paused);
+        if (next === SceneState.Editing) {
+            clearGroups();
+            State.remainingSpawns = REMAINING;
+        }
         return next;
     },
 }, SceneState.Editing);
