@@ -18,7 +18,7 @@ const enum StepState {
 };
 
 // todo: read this from level data
-const REMAINING = 2;
+const REMAINING = 5;
 
 const State = {
     remainingSpawns: REMAINING,

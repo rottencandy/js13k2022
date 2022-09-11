@@ -3,7 +3,7 @@ import { makeTextTex } from '../text';
 import rectFrag from '../shaders/panel.frag';
 import { Keys } from '../engine/input';
 import { SceneState } from '../scene';
-import { OperatorType, operatorTypeCtx } from './operators';
+import { OperatorType, operatorTypeCtx, setSelectedOperator } from './operators';
 
 let bg = createShadedRect(rectFrag, 3.7, 8.5);
 let selectorCtx = null;
@@ -19,9 +19,15 @@ setTimeout(() => {
 
     Operators = {
         [OperatorType.Belt]: operatorTypeCtx(OperatorType.Belt),
+        [OperatorType.Freezer]: operatorTypeCtx(OperatorType.Freezer),
     };
     state.selectedOpr = Object.keys(Operators)[0];
 }, 100);
+
+const oprMap = {
+        [OperatorType.Belt]: OperatorType.Belt,
+        [OperatorType.Freezer]: OperatorType.Freezer,
+};
 
 const state = {
     paused: true,
@@ -73,7 +79,7 @@ export const readOprBtns = () => {
     Object.keys(Operators).map((o, i) => {
         if (isPtrInBounds(oprBtnPos.x, oprBtnPos.y + i * btnHeight, btnWidth, btnHeight)) {
             state.scale[o] = OPR_HOVER_SIZE;
-            if (Keys.justClicked_) state.selectedOpr = o;
+            if (Keys.justClicked_) setSelectedOperator(oprMap[state.selectedOpr = o]);
         } else {
             state.scale[o] = 1;
         }

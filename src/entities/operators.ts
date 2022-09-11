@@ -12,6 +12,7 @@ export const enum OperatorType {
     Block,
     Piston,
     Spawner,
+    Freezer,
 }
 
 type Operator = {
@@ -25,6 +26,8 @@ type Operator = {
 
 const BeltOperators: Operator[] = [];
 const SpawnerOperators: Operator[] = [];
+const BlockOperators: Operator[] = [];
+const FreezerOperators: Operator[] = [];
 const State = {
     selectedOperator: OperatorType.Belt,
     showHoverOpShadow: false,
@@ -35,7 +38,12 @@ const State = {
 // Utils {{{
 
 export const isObstaclePresent = (x: number, y: number) => {
-    return SpawnerOperators.some(o => o.x === x && o.y === y);
+    return SpawnerOperators.some(o => o.x === x && o.y === y) ||
+        BlockOperators.some(o => o.x === x && o.y === y);
+};
+
+export const isTransformerPresent = (x: number, y: number) => {
+    return FreezerOperators.some(o => o.x === x && o.y === y);
 };
 
 export const getOperatorIntent = (x: number, y: number): Direction => {
@@ -48,6 +56,8 @@ export const getOperatorIntent = (x: number, y: number): Direction => {
     }
     return Direction.Non;
 };
+
+export const setSelectedOperator = (o: OperatorType) => (State.selectedOperator = o);
 
 // }}}
 
@@ -62,9 +72,28 @@ const spawnOperator = (x: number, y: number, type: OperatorType, dir: Direction)
         case OperatorType.Spawner:
             SpawnerOperators.push(opr);
             break;
+        case OperatorType.Freezer:
+            FreezerOperators.push(opr);
+            break;
     }
 }
 spawnOperator(2, 2, OperatorType.Spawner, Direction.Rgt);
+
+const checkHoverForOperatorType = (oprs: Operator[]) => {
+    return oprs.some((o, i) => {
+        if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
+            if (Keys.justClicked_) {
+                if (CursorGridPos.leftHalf) {
+                    o.dir = nextDir(o.dir);
+                } else {
+                    oprs.splice(i, 1);
+                }
+            }
+            State.showHoverOpShadow = false;
+            return State.showCellEditBtns = true;
+        }
+    });
+};
 
 export const checkGridUpdates = () => {
     if (CursorGridPos.isInRange) {
@@ -73,22 +102,13 @@ export const checkGridUpdates = () => {
         SpawnerOperators.some(o => {
             if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
                 State.showHoverOpShadow = false;
+                State.showCellEditBtns = false;
                 return true;
             }
-        });
-        BeltOperators.some((o, i) => {
-            if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
-                if (Keys.justClicked_) {
-                    if (CursorGridPos.leftHalf) {
-                        o.dir = nextDir(o.dir);
-                    } else {
-                        BeltOperators.splice(i, 1);
-                    }
-                }
-                State.showHoverOpShadow = false;
-                return State.showCellEditBtns = true;
-            }
-        });
+        }) ||
+            checkHoverForOperatorType(BeltOperators) ||
+            checkHoverForOperatorType(FreezerOperators) ||
+            (State.showCellEditBtns = false);
         if (Keys.justClicked_ && State.showHoverOpShadow) {
             spawnOperator(
                 CursorGridPos.x,
@@ -122,12 +142,14 @@ export const trySpawn = (count: number): number => {
 let beltCtx = null;
 let blockCtx = null;
 let spawnerCtx = null;
+let freezerCtx = null;
 let rotateCtx = null;
 let crossCtx = null;
 setTimeout(() => {
     beltCtx = createRectTex(makeTextTex('⏫', 100));
     blockCtx = createRectTex(makeTextTex('⬛', 100));
     spawnerCtx = createRectTex(makeTextTex('🔳', 100));
+    freezerCtx = createRectTex(makeTextTex('🆒', 100));
     rotateCtx = createRectTex(makeTextTex('↻', 170));
     crossCtx = createRectTex(makeTextTex('×', 170));
 }, 100);
@@ -140,6 +162,8 @@ export const operatorTypeCtx = (t: OperatorType) => {
             return blockCtx;
         case OperatorType.Spawner:
             return spawnerCtx;
+        case OperatorType.Freezer:
+            return freezerCtx;
     }
 };
 
@@ -147,12 +171,21 @@ const drawSpawner = (o: Operator) => {
     spawnerCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
 };
 
+const checkEditBtnPos = (x: number, y: number) => {
+    if (x === CursorGridPos.x && y === CursorGridPos.y) {
+        State.lastEditPos.x = x;
+        State.lastEditPos.y = y;
+    }
+}
+
+const drawFreezer = (o: Operator) => {
+    freezerCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
+    checkEditBtnPos(o.x, o.y);
+};
+
 const drawBeltOperator = (o: Operator) => {
     beltCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
-    if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
-        State.lastEditPos.x = o.x;
-        State.lastEditPos.y = o.y;
-    }
+    checkEditBtnPos(o.x, o.y);
 };
 
 // }}}
@@ -162,6 +195,8 @@ export const render = (state: SceneState) => {
     BeltOperators.map(drawBeltOperator);
     spawnerCtx.use_();
     SpawnerOperators.map(drawSpawner);
+    freezerCtx.use_();
+    FreezerOperators.map(drawFreezer);
     if (state === SceneState.Editing) {
         if (State.showHoverOpShadow) {
             const ctx = operatorTypeCtx(State.selectedOperator);
