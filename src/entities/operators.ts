@@ -42,7 +42,7 @@ export const isObstaclePresent = (x: number, y: number) => {
         BlockOperators.some(o => o.x === x && o.y === y);
 };
 
-export const isTransformerPresent = (x: number, y: number) => {
+export const isFreezeOprPresent = (x: number, y: number) => {
     return FreezerOperators.some(o => o.x === x && o.y === y);
 };
 

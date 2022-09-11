@@ -1,6 +1,6 @@
 import { createRectTex, Direction } from '../rect';
 import { makeTextTex } from '../text';
-import { getOperatorIntent, isObstaclePresent } from './operators';
+import { getOperatorIntent, isObstaclePresent, isFreezeOprPresent } from './operators';
 import { GRID_HEIGHT, GRID_WIDTH } from '../globals';
 
 // Types {{{
@@ -33,8 +33,10 @@ let ObjGroups: ObjGroup[] = [];
 // Render {{{
 
 let objCtx = null;
+let frzObjCtx = null;
 setTimeout(() => {
-    objCtx = createRectTex(makeTextTex('🥳', 120));
+    objCtx = createRectTex(makeTextTex('😴', 120));
+    frzObjCtx = createRectTex(makeTextTex('🥶', 120));
 }, 100);
 
 const setupTypeCtx = (t: Type) => {
@@ -42,6 +44,9 @@ const setupTypeCtx = (t: Type) => {
         case Type.Face:
             objCtx.use_();
             return objCtx;
+        case Type.FrozenFace:
+            frzObjCtx.use_();
+            return frzObjCtx;
     }
 };
 
@@ -252,11 +257,32 @@ const isInRange = (g: ObjGroup, dir: Direction, g2: ObjGroup) => {
         case Direction.Lft:
             return g2.x + gWidth(g2) === g.x &&
                 (g2.y >= g.y - 1 && g2.y < g.y + gHeight(g) + 1 ||
-                    g2.y + gHeight(g2) <= g.y + gHeight(g) + 1 && g2.y > g.y - 1);
+                    g2.y + gHeight(g2) <= g.y + gHeight(g) + 1 && g2.y + gHeight(g2) > g.y - 1);
         case Direction.Rgt:
             return g2.x === g.x + gWidth(g) &&
                 (g2.y >= g.y - 1 && g2.y < g.y + gHeight(g) + 1 ||
-                    g2.y + gHeight(g2) <= g.y + gHeight(g) + 1 && g2.y > g.y - 1);
+                    g2.y + gHeight(g2) <= g.y + gHeight(g) + 1 && g2.y + gHeight(g2) > g.y - 1);
+    }
+}
+
+const isInExactRange = (g: ObjGroup, dir: Direction, g2: ObjGroup) => {
+    switch (dir) {
+        case Direction.Top:
+            return g2.y === g.y + gHeight(g) &&
+                (g2.x >= g.x && g2.x < g.x + gWidth(g) ||
+                    g2.x + gWidth(g2) >= g.x && g2.x + gWidth(g2) < g.x + gWidth(g));
+        case Direction.Btm:
+            return g2.y + gHeight(g2) === g.y &&
+                (g2.x >= g.x && g2.x < g.x + gWidth(g) ||
+                    g2.x + gWidth(g2) >= g.x && g2.x + gWidth(g2) < g.x + gWidth(g));
+        case Direction.Lft:
+            return g2.x + gWidth(g2) === g.x &&
+                (g2.y >= g.y && g2.y < g.y + gHeight(g) ||
+                    g2.y + gHeight(g2) <= g.y + gHeight(g) && g2.y + gHeight(g2) > g.y);
+        case Direction.Rgt:
+            return g2.x === g.x + gWidth(g) &&
+                (g2.y >= g.y && g2.y < g.y + gHeight(g) ||
+                    g2.y + gHeight(g2) <= g.y + gHeight(g) && g2.y + gHeight(g2) > g.y);
     }
 }
 
@@ -324,6 +350,21 @@ const updatePos = (o: ObjGroup) => {
     o.next = Direction.Non;
 };
 
+const updateFreezeStatus = (g: ObjGroup, id: number) => {
+    const ids: number[] = [];
+    const frozenNeighbours = ObjGroups.filter((pg, id) => {
+        return pg.type === Type.FrozenFace && (
+            isInExactRange(g, Direction.Top, pg) ||
+            isInExactRange(g, Direction.Rgt, pg) ||
+            isInExactRange(g, Direction.Btm, pg) ||
+            isInExactRange(g, Direction.Lft, pg)
+        ) && ids.push(id);
+    });
+    const mg = mergeGroups([...frozenNeighbours, g]);
+    mg.type = Type.FrozenFace;
+    return { mg, ids: [...ids, id] };
+};
+
 export const prepareNextStep = () => {
     ObjGroups.map(setOperatorIntents);
     ObjGroups.map((g, id) => {
@@ -336,8 +377,24 @@ export const prepareNextStep = () => {
     });
 };
 
+const calcFreeze = () => {
+    let mergedIds: number[] = [];
+    let mergedGrp: ObjGroup[] = [];
+    ObjGroups.map((g, id) => {
+        if (g.type !== Type.Face) return;
+        if (mergedIds.includes(id)) return;
+        if (!isFreezeOprPresent(g.x, g.y)) return;
+        const { mg, ids } = updateFreezeStatus(g, id);
+        mergedIds.push(...ids);
+        mergedGrp.push(mg);
+    });
+    ObjGroups = ObjGroups.filter((_, id) => !mergedIds.includes(id))
+    ObjGroups.push(...mergedGrp);
+};
+
 export const endCurrentStep = () => {
     ObjGroups.map(updatePos);
+    calcFreeze();
 };
 
 export const clearGroups = () => {
