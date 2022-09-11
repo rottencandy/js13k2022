@@ -1,6 +1,6 @@
 import { createRectTex, Direction } from '../rect';
 import { makeTextTex } from '../text';
-import { getOperatorIntent, isObstaclePresent, isFreezeOprPresent } from './operators';
+import { getOperatorIntent, getThawOprs, isFreezeOprPresent, isObstaclePresent } from './operators';
 import { GRID_HEIGHT, GRID_WIDTH } from '../globals';
 
 // Types {{{
@@ -392,9 +392,31 @@ const calcFreeze = () => {
     ObjGroups.push(...mergedGrp);
 };
 
+const posInGroup = (x: number, y: number, g: ObjGroup) => {
+    return x >= g.x && x < g.x + gWidth(g) &&
+        y >= g.y && y < g.y + gHeight(g) &&
+        g.grid[y - g.y][x - g.x] === Opt.Some;
+};
+
+const calcThaw = () => {
+    let splitIds: number[] = [];
+    let splitGrp: ObjGroup[] = [];
+    getThawOprs().map(o => {
+        ObjGroups.map((g, id) => {
+            if (posInGroup(o.x, o.y, g)) {
+                splitIds.push(id);
+                splitGrp.push(...splitGroup(g, o.x, o.y));
+            }
+        })
+    });
+    ObjGroups = ObjGroups.filter((_, id) => !splitIds.includes(id))
+    ObjGroups.push(...splitGrp);
+};
+
 export const endCurrentStep = () => {
     ObjGroups.map(updatePos);
     calcFreeze();
+    calcThaw();
 };
 
 export const clearGroups = () => {

@@ -13,6 +13,7 @@ export const enum OperatorType {
     Piston,
     Spawner,
     Freezer,
+    Thawer,
 }
 
 type Operator = {
@@ -28,6 +29,7 @@ const BeltOperators: Operator[] = [];
 const SpawnerOperators: Operator[] = [];
 const BlockOperators: Operator[] = [];
 const FreezerOperators: Operator[] = [];
+const ThawOperators: Operator[] = [];
 const State = {
     selectedOperator: OperatorType.Belt,
     showHoverOpShadow: false,
@@ -45,6 +47,11 @@ export const isObstaclePresent = (x: number, y: number) => {
 export const isFreezeOprPresent = (x: number, y: number) => {
     return FreezerOperators.some(o => o.x === x && o.y === y);
 };
+
+export const getThawOprs = () => {
+    return ThawOperators.map(o => ({ x: o.x, y: o.y }));
+};
+
 
 export const getOperatorIntent = (x: number, y: number): Direction => {
     let op = BeltOperators.find(o => o.x === x && o.y === y);
@@ -74,6 +81,9 @@ const spawnOperator = (x: number, y: number, type: OperatorType, dir: Direction)
             break;
         case OperatorType.Freezer:
             FreezerOperators.push(opr);
+            break;
+        case OperatorType.Thawer:
+            ThawOperators.push(opr);
             break;
     }
 }
@@ -108,6 +118,7 @@ export const checkGridUpdates = () => {
         }) ||
             checkHoverForOperatorType(BeltOperators) ||
             checkHoverForOperatorType(FreezerOperators) ||
+            checkHoverForOperatorType(ThawOperators) ||
             (State.showCellEditBtns = false);
         if (Keys.justClicked_ && State.showHoverOpShadow) {
             spawnOperator(
@@ -143,6 +154,7 @@ let beltCtx = null;
 let blockCtx = null;
 let spawnerCtx = null;
 let freezerCtx = null;
+let thawCtx = null;
 let rotateCtx = null;
 let crossCtx = null;
 setTimeout(() => {
@@ -150,6 +162,7 @@ setTimeout(() => {
     blockCtx = createRectTex(makeTextTex('⬛', 100));
     spawnerCtx = createRectTex(makeTextTex('🔳', 100));
     freezerCtx = createRectTex(makeTextTex('🆒', 100));
+    thawCtx = createRectTex(makeTextTex('📛', 100));
     rotateCtx = createRectTex(makeTextTex('↻', 170));
     crossCtx = createRectTex(makeTextTex('×', 170));
 }, 100);
@@ -164,6 +177,8 @@ export const operatorTypeCtx = (t: OperatorType) => {
             return spawnerCtx;
         case OperatorType.Freezer:
             return freezerCtx;
+        case OperatorType.Thawer:
+            return thawCtx;
     }
 };
 
@@ -183,6 +198,11 @@ const drawFreezer = (o: Operator) => {
     checkEditBtnPos(o.x, o.y);
 };
 
+const drawThawer = (o: Operator) => {
+    thawCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
+    checkEditBtnPos(o.x, o.y);
+};
+
 const drawBeltOperator = (o: Operator) => {
     beltCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
     checkEditBtnPos(o.x, o.y);
@@ -197,6 +217,8 @@ export const render = (state: SceneState) => {
     SpawnerOperators.map(drawSpawner);
     freezerCtx.use_();
     FreezerOperators.map(drawFreezer);
+    thawCtx.use_();
+    ThawOperators.map(drawThawer);
     if (state === SceneState.Editing) {
         if (State.showHoverOpShadow) {
             const ctx = operatorTypeCtx(State.selectedOperator);

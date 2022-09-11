@@ -20,6 +20,7 @@ setTimeout(() => {
     Operators = {
         [OperatorType.Belt]: operatorTypeCtx(OperatorType.Belt),
         [OperatorType.Freezer]: operatorTypeCtx(OperatorType.Freezer),
+        [OperatorType.Thawer]: operatorTypeCtx(OperatorType.Thawer),
     };
     state.selectedOpr = Object.keys(Operators)[0];
 }, 100);
@@ -27,6 +28,7 @@ setTimeout(() => {
 const oprMap = {
         [OperatorType.Belt]: OperatorType.Belt,
         [OperatorType.Freezer]: OperatorType.Freezer,
+        [OperatorType.Thawer]: OperatorType.Thawer,
 };
 
 const state = {
