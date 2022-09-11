@@ -244,45 +244,39 @@ const willCollide = (g1: ObjGroup, dir1: Direction, g2: ObjGroup, dir2 = Directi
     return false;
 };
 
+// https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+const AABB = (x1: number, y1: number, w1: number, h1: number, x2: number, y2: number, w2: number, h2: number) => {
+    return (
+        x1 < x2 + w2 &&
+        x1 + w1 > x2 &&
+        y1 < y2 + h2 &&
+        y1 + h1 > y2
+    );
+};
+
 const isInRange = (g: ObjGroup, dir: Direction, g2: ObjGroup) => {
     switch (dir) {
         case Direction.Top:
-            return g2.y === g.y + gHeight(g) &&
-                (g2.x >= g.x - 1 && g2.x < g.x + gWidth(g) + 1 ||
-                    g2.x + gWidth(g2) >= g.x - 1 && g2.x + gWidth(g2) < g.x + gWidth(g) + 1);
+            return AABB(g.x - 1, g.y + 1, gWidth(g) + 2, gHeight(g), g2.x, g2.y, gWidth(g2), gHeight(g2));
         case Direction.Btm:
-            return g2.y + gHeight(g2) === g.y &&
-                (g2.x >= g.x - 1 && g2.x < g.x + gWidth(g) + 1 ||
-                    g2.x + gWidth(g2) >= g.x - 1 && g2.x + gWidth(g2) < g.x + gWidth(g) + 1);
+            return AABB(g.x - 1, g.y - 1, gWidth(g) + 2, gHeight(g), g2.x, g2.y, gWidth(g2), gHeight(g2));
         case Direction.Lft:
-            return g2.x + gWidth(g2) === g.x &&
-                (g2.y >= g.y - 1 && g2.y < g.y + gHeight(g) + 1 ||
-                    g2.y + gHeight(g2) <= g.y + gHeight(g) + 1 && g2.y + gHeight(g2) > g.y - 1);
+            return AABB(g.x - 1, g.y - 1, gWidth(g), gHeight(g) + 2, g2.x, g2.y, gWidth(g2), gHeight(g2));
         case Direction.Rgt:
-            return g2.x === g.x + gWidth(g) &&
-                (g2.y >= g.y - 1 && g2.y < g.y + gHeight(g) + 1 ||
-                    g2.y + gHeight(g2) <= g.y + gHeight(g) + 1 && g2.y + gHeight(g2) > g.y - 1);
+            return AABB(g.x + 1, g.y - 1, gWidth(g), gHeight(g) + 2, g2.x, g2.y, gWidth(g2), gHeight(g2));
     }
 }
 
 const isInExactRange = (g: ObjGroup, dir: Direction, g2: ObjGroup) => {
     switch (dir) {
         case Direction.Top:
-            return g2.y === g.y + gHeight(g) &&
-                (g2.x >= g.x && g2.x < g.x + gWidth(g) ||
-                    g2.x + gWidth(g2) >= g.x && g2.x + gWidth(g2) < g.x + gWidth(g));
+            return AABB(g.x, g.y + 1, gWidth(g), gHeight(g), g2.x, g2.y, gWidth(g2), gHeight(g2));
         case Direction.Btm:
-            return g2.y + gHeight(g2) === g.y &&
-                (g2.x >= g.x && g2.x < g.x + gWidth(g) ||
-                    g2.x + gWidth(g2) >= g.x && g2.x + gWidth(g2) < g.x + gWidth(g));
+            return AABB(g.x, g.y - 1, gWidth(g), gHeight(g), g2.x, g2.y, gWidth(g2), gHeight(g2));
         case Direction.Lft:
-            return g2.x + gWidth(g2) === g.x &&
-                (g2.y >= g.y && g2.y < g.y + gHeight(g) ||
-                    g2.y + gHeight(g2) <= g.y + gHeight(g) && g2.y + gHeight(g2) > g.y);
+            return AABB(g.x - 1, g.y, gWidth(g), gHeight(g), g2.x, g2.y, gWidth(g2), gHeight(g2));
         case Direction.Rgt:
-            return g2.x === g.x + gWidth(g) &&
-                (g2.y >= g.y && g2.y < g.y + gHeight(g) ||
-                    g2.y + gHeight(g2) <= g.y + gHeight(g) && g2.y + gHeight(g2) > g.y);
+            return AABB(g.x + 1, g.y, gWidth(g), gHeight(g), g2.x, g2.y, gWidth(g2), gHeight(g2));
     }
 }
 
