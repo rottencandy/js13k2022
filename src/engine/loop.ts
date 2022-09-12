@@ -11,19 +11,15 @@ export const startLoop = (update: StepFn, render: StepFn) => {
     (function loop(now: number) {
         // Sanity check - absorb random lag spike / frame jumps
         // (expected delta for 60FPS is 1000/60 = ~16.67ms)
-        dt += Math.min(now - last, 1e3);
+        dt += now - last;
+        if (dt > 1e3) dt = 0;
         last = now;
 
-        // don't update with a very large dt
-        // (happens if tab lost focus and regained later)
-        // if (dt > 1e3)
-        //     dt = 0;
 
-        // while (dt > step) {
-        //     dt -= step;
-        //     update(step);
-        // };
-        for(;dt>step;dt-=step,update(step));
+        while (dt > step) {
+            dt -= step;
+            update(step);
+        };
 
         render(t++);
 
