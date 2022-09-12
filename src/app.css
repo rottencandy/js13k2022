@@ -8,12 +8,8 @@ html, body {
     margin: 0;
     background: #111;
     font: 100 2.5rem Trebuchet,sans-serif;
-    color: #333;
+    color: #aaa;
     text-align: center;
-}
-
-div {
-    font-size: 7vw;
 }
 
 /* https://xem.github.io/unicode13/emoji.html */
@@ -47,12 +43,17 @@ div {
 
 #ui {
     position: absolute;
-    height: 100%;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#blurscrn {
+    height: 100vh;
+    width: 100vw;
     display: flex;
     flex-direction: column;
     transition: opacity 1s;
-    backdrop-filter: blur(1rem);
+    backdrop-filter: blur(10px);
 }
 
 /* Note for potrait devices */
@@ -64,15 +65,24 @@ div {
 }
 
 /* Runtime created elements */
-#title {
+.title {
     margin: 10vh auto;
 }
 
-#start {
+.btn {
     cursor: pointer;
+    background: #777;
+    margin: auto;
+    padding: 1vw;
+    font-size: 3vh;
 }
-#start:hover {
-    color: green;
+.btn:hover {
+    background: #999;
+}
+.btn.pause {
+    transition: opacity 1s;
+    width: 3vw;
+    margin-left: 0;
 }
 
 /* Anim */

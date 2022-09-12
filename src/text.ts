@@ -1,6 +1,6 @@
-import { createEle, CTX } from './globals';
+import { E, CTX } from './globals';
 
-const canvas = createEle('canvas') as HTMLCanvasElement;
+const canvas = E('canvas') as HTMLCanvasElement;
 
 export const makeTextTex = (text: string, size: number) => {
   const ctx2d = canvas.getContext('2d');

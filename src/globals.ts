@@ -7,13 +7,13 @@ export const GAME_HEIGHT = 360;
 export const GRID_WIDTH = 11;
 export const GRID_HEIGHT = 8;
 
-/** Create element with props */
-export const createEle = (name: string, props = {}, val = null) => {
+/** Create element node tree with props */
+export const E = (name: string, props = {}, ...children: (string|Node)[]) => {
     const ele = document.createElement(name);
     for (let k in props) {
         ele[k] = props[k];
     }
-    ele.append(val);
+    ele.append(...children);
     return ele;
 };
 

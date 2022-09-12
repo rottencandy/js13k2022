@@ -29,3 +29,4 @@ export const render = () => {
 };
 
 export const startGame = () => sm.reset(State.Playing);
+export const pauseGame = () => sm.reset(State.Paused);

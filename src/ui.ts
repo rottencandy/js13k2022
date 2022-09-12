@@ -1,27 +1,56 @@
-import { startGame } from './game';
-import { createEle } from './globals';
+import { pauseGame, startGame } from './game';
+import { E } from './globals';
 
 const root = document.getElementById('ui') as HTMLDivElement;
+const transition = (func: Function) => {
+    setTimeout(func, 750);
+};
 
-const clearRoot = () => root.innerHTML = '';
+const appendRoot = (...stuff: (string | Node)[]) => {
+    root.innerHTML = '';
+    root.append(...stuff);
+    root.style.display = 'block';
+};
+const hideRoot = () => root.style.display = 'none';
 
-export const showUI = () => {
-    root.className = 'fadei';
-    setTimeout(() => root.style.display = 'block', 1000);
-}
+export const fadeOutEle = (blurEle: HTMLElement) => blurEle.style.opacity = '0';
+export const fadeInEle = (blurEle: HTMLElement) => blurEle.style.opacity = '1';
 
-export const hideUI = () => {
-    root.className = 'fadeo';
-    setTimeout(() => root.style.display = 'none', 1000);
-}
 
-export const showTitle = () => {
-    clearRoot();
-    const startBtn = createEle('div', { id: 'start', onclick: () => { startGame(); hideUI(); }, }, 'start');
+const showGameHUD = () => {
+    fadeOutEle(document.getElementById('blurscrn'));
+    transition(() => {
+        hideRoot();
+        const pauseBtn = E('div', { className: 'btn pause', onclick: showPauseScrn }, 'II');
+        appendRoot(
+            pauseBtn
+        );
+        fadeInEle(pauseBtn);
+        startGame();
+    });
+};
 
-    root.append(
-        createEle('div', { id: 'title' }, 'Untitled'),
-        startBtn,
+export const showTitleScrn = () => {
+    const scrn = E('div', { id: 'blurscrn' },
+        E('div', { className: 'title' }, 'UNTITLED'),
+        E('div', { className: 'btn', onclick: showGameHUD, }, 'START'),
     );
-    showUI();
+    appendRoot(
+        scrn
+    );
+    fadeInEle(scrn);
+};
+
+export const showPauseScrn = () => {
+    pauseGame();
+    const scrn = E('div', { id: 'blurscrn' },
+        E('div', { className: 'title' }, 'PAUSED'),
+        E('div', { className: 'btn', onclick: showGameHUD, }, 'RESUME'),
+        E('div', { className: 'btn', onclick: showGameHUD, }, 'LEVELS'),
+    );
+    appendRoot(
+        scrn
+    );
+    fadeOutEle(scrn);
+    setTimeout(() => fadeInEle(scrn), 10);
 };

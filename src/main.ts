@@ -1,5 +1,5 @@
 import { startLoop } from './engine/loop';
-import { showTitle } from './ui';
+import { showTitleScrn } from './ui';
 import { update, render } from './game';
 
 setTimeout(() => startLoop(
@@ -7,4 +7,4 @@ setTimeout(() => startLoop(
     render,
 ), 150);
 
-showTitle();
+showTitleScrn();
