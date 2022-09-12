@@ -244,6 +244,10 @@ const willCollide = (g1: ObjGroup, dir1: Direction, g2: ObjGroup, dir2 = Directi
     return false;
 };
 
+export const groupItemCount = (g: ObjGroup) => {
+    return g.grid.reduce((acc, row) => acc + row.filter(o => o === Opt.Some).length, 0);
+};
+
 // https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
 const AABB = (x1: number, y1: number, w1: number, h1: number, x2: number, y2: number, w2: number, h2: number) => {
     return (
@@ -412,19 +416,19 @@ const removeCompleted = () => {
     const isEndPresent = (x: number, y: number) => ends.some(o => o.x === x && o.y === y);
     let count = 0;
 
-    ends.map(e =>
+    ends.map(e => {
         ObjGroups.map((g, idx) => {
             if (g.type !== Type.FrozenFace || !AABB(g.x, g.y, gWidth(g), gHeight(g), e.x, e.y, 1, 1))
                 return false;
 
-            if (g.grid.every((row, j) => row.every((o, i) =>
-            (o === Opt.None ?
-                true :
-                isEndPresent(g.x + i, g.y + j))))) {
-                ObjGroups.splice(idx, 1);
-                count++;
+            if (g.grid.every((row, j) => row.every((o, i) => (o === Opt.None ? true : isEndPresent(g.x + i, g.y + j))))) {
+                if (groupItemCount(g) === getEndOprs().length) {
+                    ObjGroups.splice(idx, 1);
+                    count++;
+                }
             }
-        }));
+        })
+    });
 
     return count;
 }
