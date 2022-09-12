@@ -19,16 +19,14 @@ const enum StepState {
     Moving,
 };
 
-// todo: read this from level data
-const SPAWNS = 5;
-
 const State = {
-    remainingSpawns: SPAWNS,
+    remainingSpawns: 0,
+    curLevelSpawns: 0,
     completedObjs: 0,
 };
 
 export const resetScene = () => {
-    State.remainingSpawns = SPAWNS;
+    State.remainingSpawns = State.curLevelSpawns;
     State.completedObjs = 0;
 }
 
@@ -52,7 +50,7 @@ const stepState = createStateMachine({
             stepTween.reset();
             const count = endCurrentStep();
             if (count) State.completedObjs += count;
-            if (State.completedObjs === State.remainingSpawns) showLevelEndScrn();
+            if (State.completedObjs === State.curLevelSpawns) showLevelEndScrn();
             return StepState.Idle;
         };
     },
@@ -89,22 +87,28 @@ export const loadEditor = () => {
     resetOperatorStates();
     setupPanel(true);
     loadOperators([], true);
+    sceneState.reset(SceneState.Editing);
+    State.curLevelSpawns = 0;
 };
 
 export const loadLevel = (id: number) => {
     setupPanel();
     const ops = parseLevel(Levels[id]);
     State.remainingSpawns = ops.spawnCount;
+    State.curLevelSpawns = ops.spawnCount;
     State.completedObjs = 0;
     loadOperators(ops.operators);
+    sceneState.reset(SceneState.Editing);
 };
 
 export const loadCustomLevel = (lv: string) => {
     setupPanel();
     const ops = parseLevel(lv);
     State.remainingSpawns = ops.spawnCount;
+    State.curLevelSpawns = ops.spawnCount;
     State.completedObjs = 0;
     loadOperators(ops.operators);
+    sceneState.reset(SceneState.Editing);
 };
 
 export const update = (dt: number) => {
