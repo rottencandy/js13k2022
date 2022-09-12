@@ -413,15 +413,15 @@ const removeCompleted = () => {
     let count = 0;
 
     ends.map(e =>
-        ObjGroups.map((g, i) => {
+        ObjGroups.map((g, idx) => {
             if (g.type !== Type.FrozenFace || !AABB(g.x, g.y, gWidth(g), gHeight(g), e.x, e.y, 1, 1))
                 return false;
 
-            if (g.grid.every((row, j) => row.every(o =>
+            if (g.grid.every((row, j) => row.every((o, i) =>
             (o === Opt.None ?
                 true :
-                isEndPresent(g.x + j, g.y + i))))) {
-                ObjGroups.splice(i, 1);
+                isEndPresent(g.x + i, g.y + j))))) {
+                ObjGroups.splice(idx, 1);
                 count++;
             }
         }));

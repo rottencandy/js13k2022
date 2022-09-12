@@ -4,6 +4,7 @@ import { createRectTex, Direction, nextDir } from '../rect';
 import { SceneState } from '../scene';
 import { makeTextTex } from '../text';
 import { isCellEmpty, spawnThawedObject } from './objects';
+import { canCollidePiston, pistonArmPos, pistonIntent } from './piston';
 
 // Types {{{
 
@@ -17,16 +18,18 @@ export const enum OperatorType {
     Thawer,
 }
 
-type Operator = {
+export type Operator = {
     x: number;
     y: number;
     type: OperatorType;
     dir: Direction;
+    data?: any;
 }
 
 // }}}
 
 const BeltOperators: Operator[] = [];
+const PistonOperators: Operator[] = [];
 const SpawnerOperators: Operator[] = [];
 const BlockOperators: Operator[] = [];
 const FreezerOperators: Operator[] = [];
@@ -43,7 +46,8 @@ const State = {
 
 export const isObstaclePresent = (x: number, y: number) => {
     return SpawnerOperators.some(o => o.x === x && o.y === y) ||
-        BlockOperators.some(o => o.x === x && o.y === y);
+        BlockOperators.some(o => o.x === x && o.y === y) ||
+        PistonOperators.some(o => canCollidePiston(o, x, y));
 };
 
 export const isFreezeOprPresent = (x: number, y: number) => {
@@ -60,10 +64,10 @@ export const getEndOprs = () => {
 
 
 export const getOperatorIntent = (x: number, y: number): Direction => {
-    let op = BeltOperators.find(o => o.x === x && o.y === y);
-    if (!op) {
-        op = SpawnerOperators.find(o => o.x === x && o.y === y);
-    }
+    let op = BeltOperators.find(o => o.x === x && o.y === y) ||
+        SpawnerOperators.find(o => o.x === x && o.y === y) ||
+        BeltOperators.find(o => o.x === x && o.y === y) ||
+        PistonOperators.find(o => pistonIntent(o, x, y));
     if (op) {
         return op.dir;
     }
@@ -81,6 +85,9 @@ const spawnOperator = (x: number, y: number, type: OperatorType, dir: Direction)
     switch (type) {
         case OperatorType.Belt:
             BeltOperators.push(opr);
+            break;
+        case OperatorType.Piston:
+            PistonOperators.push(opr);
             break;
         case OperatorType.Spawner:
             SpawnerOperators.push(opr);
@@ -131,6 +138,7 @@ export const checkGridUpdates = () => {
         checkHoverWithoutBtns(SpawnerOperators) ||
             checkHoverWithoutBtns(EndOperators) ||
             checkHoverWithBtns(BeltOperators) ||
+            checkHoverWithBtns(PistonOperators) ||
             checkHoverWithBtns(FreezerOperators) ||
             checkHoverWithBtns(ThawOperators) ||
             (State.showCellEditBtns = false);
@@ -160,6 +168,10 @@ export const trySpawn = (count: number): number => {
     return spawnCount;
 };
 
+export const resetOperatorStates = () => {
+    PistonOperators.map(p => p.data = false);
+};
+
 // }}}
 
 // Render {{{
@@ -172,6 +184,10 @@ let thawCtx = null;
 let endCtx = null;
 let rotateCtx = null;
 let crossCtx = null;
+let pistonBaseCtx = null;
+let pistonArmCtx = null;
+export let operatorTypeCtx: { [key: number ]: any } = {};
+export let panelOperatorTypeCtx: { [key: number ]: any } = {};
 setTimeout(() => {
     beltCtx = createRectTex(makeTextTex('⏫', 100));
     blockCtx = createRectTex(makeTextTex('⬛', 100));
@@ -182,24 +198,27 @@ setTimeout(() => {
 
     rotateCtx = createRectTex(makeTextTex('↻', 170));
     crossCtx = createRectTex(makeTextTex('×', 170));
-}, 100);
 
-export const operatorTypeCtx = (t: OperatorType) => {
-    switch (t) {
-        case OperatorType.Belt:
-            return beltCtx;
-        case OperatorType.Block:
-            return blockCtx;
-        case OperatorType.Spawner:
-            return spawnerCtx;
-        case OperatorType.Freezer:
-            return freezerCtx;
-        case OperatorType.Thawer:
-            return thawCtx;
-        case OperatorType.End:
-            return endCtx;
+    pistonBaseCtx = createRectTex(makeTextTex('🔝', 100));
+    pistonArmCtx = createRectTex(makeTextTex('T', 100));
+
+    operatorTypeCtx = {
+        [OperatorType.Belt]: beltCtx,
+        [OperatorType.Piston]: pistonBaseCtx,
+        [OperatorType.Block]: blockCtx,
+        [OperatorType.Spawner]: spawnerCtx,
+        [OperatorType.Freezer]: freezerCtx,
+        [OperatorType.Thawer]: thawCtx,
+        [OperatorType.End]: endCtx,
     }
-};
+
+    panelOperatorTypeCtx = {
+        [OperatorType.Belt]: beltCtx,
+        [OperatorType.Piston]: pistonBaseCtx,
+        [OperatorType.Freezer]: freezerCtx,
+        [OperatorType.Thawer]: thawCtx,
+    }
+}, 100);
 
 const drawSpawner = (o: Operator) => {
     spawnerCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
@@ -213,28 +232,40 @@ const checkEditBtnPos = (x: number, y: number) => {
 }
 
 const drawFreezer = (o: Operator) => {
-    freezerCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
+    freezerCtx.draw_(o.x, o.y, -0.04, 1, 1, o.dir);
     checkEditBtnPos(o.x, o.y);
 };
 
 const drawThawer = (o: Operator) => {
-    thawCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
+    thawCtx.draw_(o.x, o.y, -0.04, 1, 1, o.dir);
     checkEditBtnPos(o.x, o.y);
 };
 
 const drawEnd = (o: Operator) => {
-    endCtx.draw_(o.x, o.y, -0.02, 1, 1);
+    endCtx.draw_(o.x, o.y, -0.04, 1, 1);
     checkEditBtnPos(o.x, o.y);
 };
 
 const drawBeltOperator = (o: Operator) => {
-    beltCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
+    beltCtx.draw_(o.x, o.y, -0.04, 1, 1, o.dir);
     checkEditBtnPos(o.x, o.y);
+};
+
+const drawPistonBase = (o: Operator) => {
+    pistonBaseCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
+    checkEditBtnPos(o.x, o.y);
+};
+
+const drawPistonArm = (p: Operator, tweenVal: number) => {
+    if (p.data) {
+        const arm = pistonArmPos(p, tweenVal);
+        pistonArmCtx.use_().draw_(arm.x, arm.y, -0.03, 1, 1, p.dir);
+    }
 };
 
 // }}}
 
-export const render = (state: SceneState) => {
+export const render = (state: SceneState, tweenDur: number) => {
     beltCtx.use_();
     BeltOperators.map(drawBeltOperator);
     spawnerCtx.use_();
@@ -245,9 +276,13 @@ export const render = (state: SceneState) => {
     ThawOperators.map(drawThawer);
     endCtx.use_();
     EndOperators.map(drawEnd);
+    pistonBaseCtx.use_();
+    PistonOperators.map(drawPistonBase);
+    pistonArmCtx.use_();
+    PistonOperators.map(p => drawPistonArm(p, tweenDur));
     if (state === SceneState.Editing) {
         if (State.showHoverOpShadow) {
-            const ctx = operatorTypeCtx(State.selectedOperator);
+            const ctx = operatorTypeCtx[State.selectedOperator];
             ctx.use_().draw_(CursorGridPos.x, CursorGridPos.y, -0.02, 1, .7);
         }
         if (State.showCellEditBtns) {

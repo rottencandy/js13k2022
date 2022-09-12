@@ -1,7 +1,7 @@
-import { update as panelUpdate, render as panelRender, readStateBtns, readOprBtns } from './entities/panel';
+import { render as panelRender, readStateBtns, readOprBtns } from './entities/panel';
 import { render as bgRender } from './entities/backdrop';
 import { render as objectsRender, prepareNextStep, endCurrentStep, clearGroups } from './entities/objects';
-import { render as operatorsRender, checkGridUpdates, trySpawn } from './entities/operators';
+import { render as operatorsRender, checkGridUpdates, trySpawn, resetOperatorStates } from './entities/operators';
 import { createStateMachine } from './engine/state';
 import { calcCursorGridPos } from './globals';
 import { createTween, ticker } from './engine/interpolation';
@@ -18,12 +18,17 @@ const enum StepState {
 };
 
 // todo: read this from level data
-const REMAINING = 1;
+const SPAWNS = 5;
 
 const State = {
-    remainingSpawns: REMAINING,
+    remainingSpawns: SPAWNS,
     completedObjs: 0,
 };
+
+export const resetScene = () => {
+    State.remainingSpawns = SPAWNS;
+    State.completedObjs = 0;
+}
 
 const waitTicker = ticker(900);
 const stepTween = createTween(0, 1, 900);
@@ -34,6 +39,7 @@ const stepState = createStateMachine({
                 const spawnCount = trySpawn(State.remainingSpawns);
                 State.remainingSpawns -= spawnCount;
             }
+            resetOperatorStates();
             prepareNextStep();
             return StepState.Moving;
         };
@@ -62,8 +68,7 @@ const sceneState = createStateMachine({
         const next = readStateBtns(SceneState.Running);
         if (next === SceneState.Editing) {
             clearGroups();
-            State.remainingSpawns = REMAINING;
-            State.completedObjs = 0;
+            resetScene();
         }
         return next;
     },
@@ -71,8 +76,7 @@ const sceneState = createStateMachine({
         const next = readStateBtns(SceneState.Paused);
         if (next === SceneState.Editing) {
             clearGroups();
-            State.remainingSpawns = REMAINING;
-            State.completedObjs = 0;
+            resetScene();
         }
         return next;
     },
@@ -80,12 +84,11 @@ const sceneState = createStateMachine({
 
 export const update = (dt: number) => {
     sceneState.run(dt);
-    panelUpdate(dt);
 };
 
 export const render = () => {
     bgRender();
     panelRender();
-    operatorsRender(sceneState.state as SceneState);
+    operatorsRender(sceneState.state as SceneState, stepTween.val);
     objectsRender(stepTween.val);
 };

@@ -3,30 +3,25 @@ import { makeTextTex } from '../text';
 import rectFrag from '../shaders/panel.frag';
 import { Keys } from '../engine/input';
 import { SceneState } from '../scene';
-import { OperatorType, operatorTypeCtx, setSelectedOperator } from './operators';
+import { OperatorType, panelOperatorTypeCtx, setSelectedOperator } from './operators';
 
 let bg = createShadedRect(rectFrag, 3.7, 8.5);
 let selectorCtx = null;
 let playBtn = null;
 let pauseBtn = null;
 let stopBtn = null;
-let Operators = {};
 setTimeout(() => {
     selectorCtx = createRectTex(makeTextTex('⛶', 100));
     playBtn = createRectTex(makeTextTex('▶', 100));
     pauseBtn = createRectTex(makeTextTex('⏸', 100));
     stopBtn = createRectTex(makeTextTex('⏹', 100));
 
-    Operators = {
-        [OperatorType.Belt]: operatorTypeCtx(OperatorType.Belt),
-        [OperatorType.Freezer]: operatorTypeCtx(OperatorType.Freezer),
-        [OperatorType.Thawer]: operatorTypeCtx(OperatorType.Thawer),
-    };
-    state.selectedOpr = Object.keys(Operators)[0];
+    state.selectedOpr = Object.keys(panelOperatorTypeCtx)[0];
 }, 100);
 
 const oprMap = {
         [OperatorType.Belt]: OperatorType.Belt,
+        [OperatorType.Piston]: OperatorType.Piston,
         [OperatorType.Freezer]: OperatorType.Freezer,
         [OperatorType.Thawer]: OperatorType.Thawer,
 };
@@ -39,7 +34,7 @@ const state = {
         btn2: 1,
         [OperatorType.Belt]: 1,
     },
-    selectedOpr: Object.keys(Operators)[0],
+    selectedOpr: Object.keys(panelOperatorTypeCtx)[0],
 };
 // todo: lerped hover size
 const BTN_HOVER_SIZE = 1.2;
@@ -78,7 +73,7 @@ export const readStateBtns = (prevState: SceneState) => {
 
 export const readOprBtns = () => {
     if (Keys.ptrX_ > 0.205 || Keys.ptrY_ < 0.25) return;
-    Object.keys(Operators).map((o, i) => {
+    Object.keys(panelOperatorTypeCtx).map((o, i) => {
         if (isPtrInBounds(oprBtnPos.x, oprBtnPos.y + i * btnHeight, btnWidth, btnHeight)) {
             state.scale[o] = OPR_HOVER_SIZE;
             if (Keys.justClicked_) setSelectedOperator(oprMap[state.selectedOpr = o]);
@@ -86,9 +81,6 @@ export const readOprBtns = () => {
             state.scale[o] = 1;
         }
     });
-};
-
-export const update = (dt: number) => {
 };
 
 export const render = () => {
@@ -100,8 +92,8 @@ export const render = () => {
     }
     stopBtn.use_().draw_(-1.9, 6.5, .11, state.scale.btn2);
 
-    Object.keys(Operators).map((o, i) => {
-        Operators[o].use_().draw_(-2.3, 5 - i, .11, state.scale[o]);
+    Object.keys(panelOperatorTypeCtx).map((o, i) => {
+        panelOperatorTypeCtx[o].use_().draw_(-2.3, 5 - i, .11, state.scale[o]);
         if (state.scene === SceneState.Editing && state.selectedOpr === o) {
             selectorCtx.use_().draw_(-2.3, 5 - i, .11, 1.1);
         }
