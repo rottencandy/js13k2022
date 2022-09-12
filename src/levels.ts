@@ -19,13 +19,14 @@ const dirMap = {
     y: Direction.Btm,
     z: Direction.Rgt,
 };
+
 const dirRevMap = {
     [Direction.Non]: 'v',
     [Direction.Top]: 'w',
     [Direction.Lft]: 'x',
     [Direction.Btm]: 'y',
     [Direction.Rgt]: 'z',
-}
+};
 
 const oprMap = {
     a: OperatorType.Spawner,
@@ -51,7 +52,7 @@ export const parseLevel = (lvl: string): Level => {
     let spawnCount = parseInt(lvl[ptr]);
     let digit = 0;
     while (digit = parseInt(lvl[++ptr]))
-        spawnCount += 10 * digit;
+        spawnCount = 10 * spawnCount + digit;
 
     while (ptr < lvl.length) {
         const type = oprMap[lvl[ptr]];

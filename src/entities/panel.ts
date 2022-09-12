@@ -21,9 +21,12 @@ setTimeout(() => {
 
 const oprMap = {
         [OperatorType.Belt]: OperatorType.Belt,
+        [OperatorType.Block]: OperatorType.Block,
         [OperatorType.Piston]: OperatorType.Piston,
         [OperatorType.Freezer]: OperatorType.Freezer,
         [OperatorType.Thawer]: OperatorType.Thawer,
+        [OperatorType.End]: OperatorType.End,
+        [OperatorType.Spawner]: OperatorType.Spawner,
 };
 
 const state = {
@@ -35,7 +38,7 @@ const state = {
         [OperatorType.Belt]: 1,
     },
     panelOprList: {},
-    selectedOpr: Object.keys(playPanelOprCtx)[0],
+    selectedOpr: null,
 };
 // todo: lerped hover size
 const BTN_HOVER_SIZE = 1.2;
@@ -74,6 +77,7 @@ export const readStateBtns = (prevState: SceneState) => {
 
 export const setupPanel = (isEditor?: boolean) => {
     state.panelOprList = isEditor ? editPanelOprCtx : playPanelOprCtx;
+    state.selectedOpr = Object.keys(state.panelOprList)[0];
 };
 
 export const readOprBtns = () => {

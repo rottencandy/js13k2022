@@ -1,11 +1,12 @@
 import { render as panelRender, readStateBtns, readOprBtns, setupPanel } from './entities/panel';
 import { render as bgRender } from './entities/backdrop';
 import { render as objectsRender, prepareNextStep, endCurrentStep, clearGroups } from './entities/objects';
-import { render as operatorsRender, checkGridUpdates, trySpawn, resetOperatorStates, loadOperators } from './entities/operators';
+import { render as operatorsRender, trySpawn, resetOperatorStates, loadOperators, checkGridUpdates } from './entities/operators';
 import { createStateMachine } from './engine/state';
 import { calcCursorGridPos } from './globals';
 import { createTween, ticker } from './engine/interpolation';
 import { Levels, parseLevel } from './levels';
+import { showLevelEndScrn } from './ui';
 
 export const enum SceneState {
     Editing = 1,
@@ -51,6 +52,7 @@ const stepState = createStateMachine({
             stepTween.reset();
             const count = endCurrentStep();
             if (count) State.completedObjs += count;
+            if (State.completedObjs === State.remainingSpawns) showLevelEndScrn();
             return StepState.Idle;
         };
     },
@@ -84,14 +86,24 @@ const sceneState = createStateMachine({
 }, SceneState.Editing);
 
 export const loadEditor = () => {
+    resetOperatorStates();
     setupPanel(true);
-    loadOperators([]);
+    loadOperators([], true);
 };
 
 export const loadLevel = (id: number) => {
     setupPanel();
     const ops = parseLevel(Levels[id]);
     State.remainingSpawns = ops.spawnCount;
+    State.completedObjs = 0;
+    loadOperators(ops.operators);
+};
+
+export const loadCustomLevel = (lv: string) => {
+    setupPanel();
+    const ops = parseLevel(lv);
+    State.remainingSpawns = ops.spawnCount;
+    State.completedObjs = 0;
     loadOperators(ops.operators);
 };
 
