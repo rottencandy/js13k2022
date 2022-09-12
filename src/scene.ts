@@ -1,10 +1,11 @@
-import { render as panelRender, readStateBtns, readOprBtns } from './entities/panel';
+import { render as panelRender, readStateBtns, readOprBtns, setupPanel } from './entities/panel';
 import { render as bgRender } from './entities/backdrop';
 import { render as objectsRender, prepareNextStep, endCurrentStep, clearGroups } from './entities/objects';
-import { render as operatorsRender, checkGridUpdates, trySpawn, resetOperatorStates } from './entities/operators';
+import { render as operatorsRender, checkGridUpdates, trySpawn, resetOperatorStates, loadOperators } from './entities/operators';
 import { createStateMachine } from './engine/state';
 import { calcCursorGridPos } from './globals';
 import { createTween, ticker } from './engine/interpolation';
+import { Levels, parseLevel } from './levels';
 
 export const enum SceneState {
     Editing = 1,
@@ -81,6 +82,18 @@ const sceneState = createStateMachine({
         return next;
     },
 }, SceneState.Editing);
+
+export const loadEditor = () => {
+    setupPanel(true);
+    loadOperators([]);
+};
+
+export const loadLevel = (id: number) => {
+    setupPanel();
+    const ops = parseLevel(Levels[id]);
+    State.remainingSpawns = ops.spawnCount;
+    loadOperators(ops.operators);
+};
 
 export const update = (dt: number) => {
     sceneState.run(dt);

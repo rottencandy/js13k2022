@@ -1,5 +1,7 @@
 import { pauseGame, startGame } from './game';
 import { E } from './globals';
+import { Levels } from './levels';
+import { loadLevel } from './scene';
 
 const root = document.getElementById('ui') as HTMLDivElement;
 const transition = (func: Function) => {
@@ -33,7 +35,7 @@ const showGameHUD = () => {
 export const showTitleScrn = () => {
     const scrn = E('div', { id: 'blurscrn' },
         E('div', { className: 'title' }, 'UNTITLED'),
-        E('div', { className: 'btn', onclick: showGameHUD, }, 'START'),
+        E('div', { className: 'btn', onclick: showLevelScrn, }, 'START'),
     );
     appendRoot(
         scrn
@@ -41,12 +43,33 @@ export const showTitleScrn = () => {
     fadeInEle(scrn);
 };
 
+export const showLevelScrn = () => {
+    const scrn = E('div', { id: 'blurscrn' },
+        E('div', { className: 'title' }, 'LEVELS'),
+        E('div', { className: 'levels', onclick: showGameHUD, },
+            ...Levels.map((_, i) =>
+                E('div', {
+                    className: 'level btn',
+                    onclick: () => {
+                        loadLevel(i);
+                        showGameHUD();
+                    },
+                },
+                    i + 1 + ''))),
+    );
+    appendRoot(
+        scrn
+    );
+    fadeOutEle(scrn);
+    setTimeout(() => fadeInEle(scrn), 10);
+};
+
 export const showPauseScrn = () => {
     pauseGame();
     const scrn = E('div', { id: 'blurscrn' },
         E('div', { className: 'title' }, 'PAUSED'),
         E('div', { className: 'btn', onclick: showGameHUD, }, 'RESUME'),
-        E('div', { className: 'btn', onclick: showGameHUD, }, 'LEVELS'),
+        E('div', { className: 'btn', onclick: showLevelScrn, }, 'LEVELS'),
     );
     appendRoot(
         scrn

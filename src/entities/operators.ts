@@ -28,13 +28,13 @@ export type Operator = {
 
 // }}}
 
-const BeltOperators: Operator[] = [];
-const PistonOperators: Operator[] = [];
-const SpawnerOperators: Operator[] = [];
-const BlockOperators: Operator[] = [];
-const FreezerOperators: Operator[] = [];
-const ThawOperators: Operator[] = [];
-const EndOperators: Operator[] = [];
+let BeltOperators: Operator[] = [];
+let PistonOperators: Operator[] = [];
+let SpawnerOperators: Operator[] = [];
+let BlockOperators: Operator[] = [];
+let FreezerOperators: Operator[] = [];
+let ThawOperators: Operator[] = [];
+let EndOperators: Operator[] = [];
 const State = {
     selectedOperator: OperatorType.Belt,
     showHoverOpShadow: false,
@@ -76,6 +76,42 @@ export const getOperatorIntent = (x: number, y: number): Direction => {
 
 export const setSelectedOperator = (o: OperatorType) => (State.selectedOperator = o);
 
+export const loadOperators = (operators: Operator[]) => {
+    BeltOperators = [];
+    BlockOperators = [];
+    PistonOperators = [];
+    SpawnerOperators = [];
+    EndOperators = [];
+    FreezerOperators = [];
+    ThawOperators = [];
+
+    operators.map(o => {
+        switch (o.type) {
+            case OperatorType.Belt:
+                BeltOperators.push(o);
+                break;
+            case OperatorType.Block:
+                BlockOperators.push(o);
+                break;
+            case OperatorType.Piston:
+                PistonOperators.push(o);
+                break;
+            case OperatorType.Spawner:
+                SpawnerOperators.push(o);
+                break;
+            case OperatorType.End:
+                EndOperators.push(o);
+                break;
+            case OperatorType.Freezer:
+                FreezerOperators.push(o);
+                break;
+            case OperatorType.Thawer:
+                ThawOperators.push(o);
+                break;
+        }
+    })
+};
+
 // }}}
 
 // Update {{{
@@ -103,8 +139,6 @@ const spawnOperator = (x: number, y: number, type: OperatorType, dir: Direction)
             break;
     }
 }
-spawnOperator(2, 2, OperatorType.Spawner, Direction.Rgt);
-spawnOperator(4, 4, OperatorType.End, Direction.Non);
 
 const checkHoverWithBtns = (oprs: Operator[]) => {
     return oprs.some((o, i) => {
@@ -186,8 +220,9 @@ let rotateCtx = null;
 let crossCtx = null;
 let pistonBaseCtx = null;
 let pistonArmCtx = null;
-export let operatorTypeCtx: { [key: number ]: any } = {};
-export let panelOperatorTypeCtx: { [key: number ]: any } = {};
+export let operatorTypeCtx: { [key: number]: any } = {};
+export let playPanelOprCtx: { [key: number]: any } = {};
+export let editPanelOprCtx: { [key: number]: any } = {};
 setTimeout(() => {
     beltCtx = createRectTex(makeTextTex('⏫', 100));
     blockCtx = createRectTex(makeTextTex('⬛', 100));
@@ -212,7 +247,13 @@ setTimeout(() => {
         [OperatorType.End]: endCtx,
     }
 
-    panelOperatorTypeCtx = {
+    editPanelOprCtx = {
+        [OperatorType.Block]: blockCtx,
+        [OperatorType.Spawner]: spawnerCtx,
+        [OperatorType.End]: endCtx,
+    }
+
+    playPanelOprCtx = {
         [OperatorType.Belt]: beltCtx,
         [OperatorType.Piston]: pistonBaseCtx,
         [OperatorType.Freezer]: freezerCtx,

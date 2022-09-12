@@ -3,7 +3,7 @@ import { makeTextTex } from '../text';
 import rectFrag from '../shaders/panel.frag';
 import { Keys } from '../engine/input';
 import { SceneState } from '../scene';
-import { OperatorType, panelOperatorTypeCtx, setSelectedOperator } from './operators';
+import { editPanelOprCtx, OperatorType, playPanelOprCtx, setSelectedOperator } from './operators';
 
 let bg = createShadedRect(rectFrag, 3.7, 8.5);
 let selectorCtx = null;
@@ -16,7 +16,7 @@ setTimeout(() => {
     pauseBtn = createRectTex(makeTextTex('⏸', 100));
     stopBtn = createRectTex(makeTextTex('⏹', 100));
 
-    state.selectedOpr = Object.keys(panelOperatorTypeCtx)[0];
+    state.selectedOpr = Object.keys(state.panelOprList)[0];
 }, 100);
 
 const oprMap = {
@@ -34,7 +34,8 @@ const state = {
         btn2: 1,
         [OperatorType.Belt]: 1,
     },
-    selectedOpr: Object.keys(panelOperatorTypeCtx)[0],
+    panelOprList: {},
+    selectedOpr: Object.keys(playPanelOprCtx)[0],
 };
 // todo: lerped hover size
 const BTN_HOVER_SIZE = 1.2;
@@ -71,9 +72,13 @@ export const readStateBtns = (prevState: SceneState) => {
     } else state.scale.btn2 = 1;
 };
 
+export const setupPanel = (isEditor?: boolean) => {
+    state.panelOprList = isEditor ? editPanelOprCtx : playPanelOprCtx;
+};
+
 export const readOprBtns = () => {
     if (Keys.ptrX_ > 0.205 || Keys.ptrY_ < 0.25) return;
-    Object.keys(panelOperatorTypeCtx).map((o, i) => {
+    Object.keys(state.panelOprList).map((o, i) => {
         if (isPtrInBounds(oprBtnPos.x, oprBtnPos.y + i * btnHeight, btnWidth, btnHeight)) {
             state.scale[o] = OPR_HOVER_SIZE;
             if (Keys.justClicked_) setSelectedOperator(oprMap[state.selectedOpr = o]);
@@ -92,8 +97,8 @@ export const render = () => {
     }
     stopBtn.use_().draw_(-1.9, 6.5, .11, state.scale.btn2);
 
-    Object.keys(panelOperatorTypeCtx).map((o, i) => {
-        panelOperatorTypeCtx[o].use_().draw_(-2.3, 5 - i, .11, state.scale[o]);
+    Object.keys(state.panelOprList).map((o, i) => {
+        state.panelOprList[o].use_().draw_(-2.3, 5 - i, .11, state.scale[o]);
         if (state.scene === SceneState.Editing && state.selectedOpr === o) {
             selectorCtx.use_().draw_(-2.3, 5 - i, .11, 1.1);
         }
