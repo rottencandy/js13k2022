@@ -12,6 +12,7 @@ export const enum OperatorType {
     Block,
     Piston,
     Spawner,
+    End,
     Freezer,
     Thawer,
 }
@@ -30,6 +31,7 @@ const SpawnerOperators: Operator[] = [];
 const BlockOperators: Operator[] = [];
 const FreezerOperators: Operator[] = [];
 const ThawOperators: Operator[] = [];
+const EndOperators: Operator[] = [];
 const State = {
     selectedOperator: OperatorType.Belt,
     showHoverOpShadow: false,
@@ -50,6 +52,10 @@ export const isFreezeOprPresent = (x: number, y: number) => {
 
 export const getThawOprs = () => {
     return ThawOperators.map(o => ({ x: o.x, y: o.y }));
+};
+
+export const getEndOprs = () => {
+    return EndOperators.map(o => ({ x: o.x, y: o.y }));
 };
 
 
@@ -85,11 +91,15 @@ const spawnOperator = (x: number, y: number, type: OperatorType, dir: Direction)
         case OperatorType.Thawer:
             ThawOperators.push(opr);
             break;
+        case OperatorType.End:
+            EndOperators.push(opr);
+            break;
     }
 }
 spawnOperator(2, 2, OperatorType.Spawner, Direction.Rgt);
+spawnOperator(4, 4, OperatorType.End, Direction.Non);
 
-const checkHoverForOperatorType = (oprs: Operator[]) => {
+const checkHoverWithBtns = (oprs: Operator[]) => {
     return oprs.some((o, i) => {
         if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
             if (Keys.justClicked_) {
@@ -104,21 +114,25 @@ const checkHoverForOperatorType = (oprs: Operator[]) => {
         }
     });
 };
+const checkHoverWithoutBtns = (oprs: Operator[]) => {
+    return oprs.some(o => {
+        if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
+            State.showHoverOpShadow = false;
+            State.showCellEditBtns = false;
+            return true;
+        }
+    })
+};
 
 export const checkGridUpdates = () => {
     if (CursorGridPos.isInRange) {
         State.showHoverOpShadow = true;
         State.showCellEditBtns = true;
-        SpawnerOperators.some(o => {
-            if (o.x === CursorGridPos.x && o.y === CursorGridPos.y) {
-                State.showHoverOpShadow = false;
-                State.showCellEditBtns = false;
-                return true;
-            }
-        }) ||
-            checkHoverForOperatorType(BeltOperators) ||
-            checkHoverForOperatorType(FreezerOperators) ||
-            checkHoverForOperatorType(ThawOperators) ||
+        checkHoverWithoutBtns(SpawnerOperators) ||
+            checkHoverWithoutBtns(EndOperators) ||
+            checkHoverWithBtns(BeltOperators) ||
+            checkHoverWithBtns(FreezerOperators) ||
+            checkHoverWithBtns(ThawOperators) ||
             (State.showCellEditBtns = false);
         if (Keys.justClicked_ && State.showHoverOpShadow) {
             spawnOperator(
@@ -155,6 +169,7 @@ let blockCtx = null;
 let spawnerCtx = null;
 let freezerCtx = null;
 let thawCtx = null;
+let endCtx = null;
 let rotateCtx = null;
 let crossCtx = null;
 setTimeout(() => {
@@ -163,6 +178,8 @@ setTimeout(() => {
     spawnerCtx = createRectTex(makeTextTex('🔳', 100));
     freezerCtx = createRectTex(makeTextTex('🆒', 100));
     thawCtx = createRectTex(makeTextTex('📛', 100));
+    endCtx = createRectTex(makeTextTex('🔲', 100));
+
     rotateCtx = createRectTex(makeTextTex('↻', 170));
     crossCtx = createRectTex(makeTextTex('×', 170));
 }, 100);
@@ -179,6 +196,8 @@ export const operatorTypeCtx = (t: OperatorType) => {
             return freezerCtx;
         case OperatorType.Thawer:
             return thawCtx;
+        case OperatorType.End:
+            return endCtx;
     }
 };
 
@@ -203,6 +222,11 @@ const drawThawer = (o: Operator) => {
     checkEditBtnPos(o.x, o.y);
 };
 
+const drawEnd = (o: Operator) => {
+    endCtx.draw_(o.x, o.y, -0.02, 1, 1);
+    checkEditBtnPos(o.x, o.y);
+};
+
 const drawBeltOperator = (o: Operator) => {
     beltCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
     checkEditBtnPos(o.x, o.y);
@@ -219,6 +243,8 @@ export const render = (state: SceneState) => {
     FreezerOperators.map(drawFreezer);
     thawCtx.use_();
     ThawOperators.map(drawThawer);
+    endCtx.use_();
+    EndOperators.map(drawEnd);
     if (state === SceneState.Editing) {
         if (State.showHoverOpShadow) {
             const ctx = operatorTypeCtx(State.selectedOperator);

@@ -18,10 +18,11 @@ const enum StepState {
 };
 
 // todo: read this from level data
-const REMAINING = 5;
+const REMAINING = 1;
 
 const State = {
     remainingSpawns: REMAINING,
+    completedObjs: 0,
 };
 
 const waitTicker = ticker(900);
@@ -41,7 +42,8 @@ const stepState = createStateMachine({
         stepTween.step(dt);
         if (stepTween.done) {
             stepTween.reset();
-            endCurrentStep();
+            const count = endCurrentStep();
+            if (count) State.completedObjs += count;
             return StepState.Idle;
         };
     },
@@ -61,6 +63,7 @@ const sceneState = createStateMachine({
         if (next === SceneState.Editing) {
             clearGroups();
             State.remainingSpawns = REMAINING;
+            State.completedObjs = 0;
         }
         return next;
     },
@@ -69,6 +72,7 @@ const sceneState = createStateMachine({
         if (next === SceneState.Editing) {
             clearGroups();
             State.remainingSpawns = REMAINING;
+            State.completedObjs = 0;
         }
         return next;
     },

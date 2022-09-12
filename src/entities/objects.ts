@@ -1,6 +1,6 @@
 import { createRectTex, Direction } from '../rect';
 import { makeTextTex } from '../text';
-import { getOperatorIntent, getThawOprs, isFreezeOprPresent, isObstaclePresent } from './operators';
+import { getEndOprs, getOperatorIntent, getThawOprs, isFreezeOprPresent, isObstaclePresent } from './operators';
 import { GRID_HEIGHT, GRID_WIDTH } from '../globals';
 
 // Types {{{
@@ -407,10 +407,33 @@ const calcThaw = () => {
     ObjGroups.push(...splitGrp);
 };
 
+const removeCompleted = () => {
+    const ends = getEndOprs();
+    const isEndPresent = (x: number, y: number) => ends.some(o => o.x === x && o.y === y);
+    let count = 0;
+
+    ends.map(e =>
+        ObjGroups.map((g, i) => {
+            if (g.type !== Type.FrozenFace || !AABB(g.x, g.y, gWidth(g), gHeight(g), e.x, e.y, 1, 1))
+                return false;
+
+            if (g.grid.every((row, j) => row.every(o =>
+            (o === Opt.None ?
+                true :
+                isEndPresent(g.x + j, g.y + i))))) {
+                ObjGroups.splice(i, 1);
+                count++;
+            }
+        }));
+
+    return count;
+}
+
 export const endCurrentStep = () => {
     ObjGroups.map(updatePos);
     calcFreeze();
     calcThaw();
+    return removeCompleted();
 };
 
 export const clearGroups = () => {
@@ -419,134 +442,134 @@ export const clearGroups = () => {
 
 // }}}
 
-// so called "tests" {{{
-
-console.log(mergeGroups([spawnObjectGroup(0, 0), spawnObjectGroup(0, 1)]));
-console.log(splitGroup(
-    {
-        grid: [
-            [1, 1, 1],
-            [1, 1, 1],
-            [1, 1, 1],
-        ],
-        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    },
-    2, 2));
-console.log(splitGroup(
-    {
-        grid: [
-            [1, 1, 1],
-            [1, 0, 1],
-            [1, 0, 1],
-        ],
-        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    },
-    2, 1));
-console.log(splitGroup(
-    {
-        grid: [
-            [1, 1, 1],
-            [1, 0, 0],
-            [1, 1, 1],
-        ],
-        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    },
-    1, 2));
-console.log(splitGroup(
-    {
-        grid: [
-            [1, 1, 1],
-            [0, 1, 1],
-            [0, 1, 1],
-        ],
-        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    },
-    1, 1));
-
-console.log(willCollide(
-    {
-        grid: [
-            [1, 1],
-            [1, 0],
-        ],
-        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    },
-    Direction.Rgt,
-    {
-        grid: [
-            [0, 1],
-            [1, 1],
-        ],
-        x: 2, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }) === false);
-console.log(willCollide(
-    {
-        grid: [
-            [1, 1],
-            [1, 0],
-        ],
-        x: 2, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    },
-    Direction.Lft,
-    {
-        grid: [
-            [0, 1],
-            [1, 0],
-            [1, 0],
-        ],
-        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }) === false);
-console.log(willCollide(
-    {
-        grid: [
-            [0, 1, 0],
-            [1, 1, 1],
-        ],
-        x: 1, y: 2, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    },
-    Direction.Top,
-    {
-        grid: [
-            [0, 1],
-            [1, 0],
-        ],
-        x: 1, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }) === false);
-console.log(willCollide(
-    {
-        grid: [
-            [1, 1],
-            [1, 0],
-        ],
-        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    },
-    Direction.Btm,
-    {
-        grid: [
-            [0, 1],
-            [1, 1],
-        ],
-        x: 0, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }) === false);
-console.log(willCollide(
-    {
-        grid: [[1]],
-        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    },
-    Direction.Btm,
-    {
-        grid: [[0]],
-        x: 5, y: 5, type: Type.Face, intent: Direction.Non, next: Direction.Non,
-    }) === false);
-console.log(
-    willCollide(
-        spawnObjectGroup(0, 0),
-        Direction.Top,
-        spawnObjectGroup(0, 1),
-        Direction.Rgt
-    ) === false);
-
-// }}}
+//// so called "tests" {{{
+//
+//console.log(mergeGroups([spawnObjectGroup(0, 0), spawnObjectGroup(0, 1)]));
+//console.log(splitGroup(
+//    {
+//        grid: [
+//            [1, 1, 1],
+//            [1, 1, 1],
+//            [1, 1, 1],
+//        ],
+//        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    },
+//    2, 2));
+//console.log(splitGroup(
+//    {
+//        grid: [
+//            [1, 1, 1],
+//            [1, 0, 1],
+//            [1, 0, 1],
+//        ],
+//        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    },
+//    2, 1));
+//console.log(splitGroup(
+//    {
+//        grid: [
+//            [1, 1, 1],
+//            [1, 0, 0],
+//            [1, 1, 1],
+//        ],
+//        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    },
+//    1, 2));
+//console.log(splitGroup(
+//    {
+//        grid: [
+//            [1, 1, 1],
+//            [0, 1, 1],
+//            [0, 1, 1],
+//        ],
+//        x: 1, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    },
+//    1, 1));
+//
+//console.log(willCollide(
+//    {
+//        grid: [
+//            [1, 1],
+//            [1, 0],
+//        ],
+//        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    },
+//    Direction.Rgt,
+//    {
+//        grid: [
+//            [0, 1],
+//            [1, 1],
+//        ],
+//        x: 2, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    }) === false);
+//console.log(willCollide(
+//    {
+//        grid: [
+//            [1, 1],
+//            [1, 0],
+//        ],
+//        x: 2, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    },
+//    Direction.Lft,
+//    {
+//        grid: [
+//            [0, 1],
+//            [1, 0],
+//            [1, 0],
+//        ],
+//        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    }) === false);
+//console.log(willCollide(
+//    {
+//        grid: [
+//            [0, 1, 0],
+//            [1, 1, 1],
+//        ],
+//        x: 1, y: 2, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    },
+//    Direction.Top,
+//    {
+//        grid: [
+//            [0, 1],
+//            [1, 0],
+//        ],
+//        x: 1, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    }) === false);
+//console.log(willCollide(
+//    {
+//        grid: [
+//            [1, 1],
+//            [1, 0],
+//        ],
+//        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    },
+//    Direction.Btm,
+//    {
+//        grid: [
+//            [0, 1],
+//            [1, 1],
+//        ],
+//        x: 0, y: 1, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    }) === false);
+//console.log(willCollide(
+//    {
+//        grid: [[1]],
+//        x: 0, y: 0, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    },
+//    Direction.Btm,
+//    {
+//        grid: [[0]],
+//        x: 5, y: 5, type: Type.Face, intent: Direction.Non, next: Direction.Non,
+//    }) === false);
+//console.log(
+//    willCollide(
+//        spawnObjectGroup(0, 0),
+//        Direction.Top,
+//        spawnObjectGroup(0, 1),
+//        Direction.Rgt
+//    ) === false);
+//
+//// }}}
 
 export const render = (tweenAmt: number) => {
     ObjGroups.map((o) => drawLerpedGroup(o, tweenAmt));
