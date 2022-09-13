@@ -424,7 +424,7 @@ const removeCompleted = () => {
             if (g.grid.every((row, j) => row.every((o, i) => (o === Opt.None ? true : isEndPresent(g.x + i, g.y + j))))) {
                 if (groupItemCount(g) === getEndOprs().length) {
                     ObjGroups.splice(idx, 1);
-                    count++;
+                    count+=groupItemCount(g);
                 }
             }
         })

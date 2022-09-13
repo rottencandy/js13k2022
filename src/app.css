@@ -98,6 +98,12 @@ html, body {
     width: 50%;
     height: 70%;
 }
+.instrbox.box4 {
+    left: 35vw;
+    top: 80vh;
+    width: 35%;
+    height: 7%;
+}
 
 /* Note for potrait devices */
 #d {

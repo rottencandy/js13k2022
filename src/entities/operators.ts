@@ -119,7 +119,7 @@ export const loadOperators = (operators: Operator[], isEditor?: boolean) => {
         State.selectedOperator = OperatorType.Block;
         State.gridCheckType = checkGridEdiorUpdates;
     } else {
-        OperatorType.Belt;
+        State.selectedOperator = OperatorType.Belt;
         State.gridCheckType = checkGridLevelUpdates;
     };
     updateHUDEnergy(State.opCount = 0);
@@ -227,6 +227,10 @@ const checkGridEdiorUpdates = () => {
         checkHoverWithBtns(SpawnerOps) ||
             checkHoverWithBtns(EndOps) ||
             checkHoverWithBtns(BlockOps) ||
+            checkHoverWithBtns(BeltOps) ||
+            checkHoverWithBtns(PistonOps) ||
+            checkHoverWithBtns(FreezerOps) ||
+            checkHoverWithBtns(ThawOps) ||
             (State.showCellEditBtns = false);
         if (Keys.justClicked_ && State.showHoverOpShadow) {
             spawnOperator(

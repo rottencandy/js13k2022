@@ -128,7 +128,7 @@ const showLevelInputScrn = () => {
             className: 'btn', onclick: () => {
                 // @ts-ignore
                 loadCustomLevel(input.value);
-                startGame();
+                showGameHUD();
             },
         }, 'START'),
     );
@@ -170,6 +170,7 @@ const showInstructions = () => {
             E('div', { className: 'instrbox box1', }, '❷ start/stop machines'),
             E('div', { className: 'instrbox box2', }, '❶ select machines'),
             E('div', { className: 'instrbox box3', }, '❸ place machines & move frozen bodies to cryochambers'),
+            E('div', { className: 'instrbox box4', }, '(simply start the machines to complete this level)'),
         ),
     );
 };
@@ -217,7 +218,7 @@ const showLevelScrn = () => {
             ...Levels.map((_, i) => {
                 const [energy, time] = getLevelStats(i);
                 return E('div', {
-                    className: 'level btn ' + (energy && time ? 'visited' : ''),
+                    className: 'level btn ' + (!isNaN(energy) && !isNaN(time) ? 'visited' : ''),
                     onclick: () => {
                         resetOperatorStates();
                         loadLevel(i);

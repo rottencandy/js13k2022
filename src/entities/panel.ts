@@ -3,7 +3,7 @@ import { makeTextTex } from '../text';
 import rectFrag from '../shaders/panel.frag';
 import { Keys } from '../engine/input';
 import { SceneState } from '../scene';
-import { editPanelOprCtx, OperatorType, playPanelOprCtx, setSelectedOperator } from './operators';
+import { editPanelOprCtx, OperatorType, operatorTypeCtx, playPanelOprCtx, setSelectedOperator } from './operators';
 
 let bg = createShadedRect(rectFrag, 3.7, 8.5);
 let selectorCtx = null;
@@ -78,9 +78,10 @@ export const readStateBtns = (prevState: SceneState) => {
 };
 
 export const setupPanel = (isEditor?: boolean) => {
-    state.panelOprList = isEditor ? editPanelOprCtx : playPanelOprCtx;
+    state.panelOprList = isEditor ? operatorTypeCtx : playPanelOprCtx;
     state.selectedOpr = Object.keys(state.panelOprList)[0];
     state.isEditor = isEditor;
+    state.paused = true;
 };
 
 export const readOprBtns = () => {

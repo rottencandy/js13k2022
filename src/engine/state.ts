@@ -35,7 +35,10 @@ export const createStateMachine = (states: StateObject, initial: string | number
                 thisObj.state = next;
             }
         },
-        reset: (state: string | number) => current = states[state],
+        reset: (state: string | number) => {
+            current = states[state];
+            thisObj.state = state;
+        },
     };
 
     return thisObj;

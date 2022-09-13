@@ -9,7 +9,13 @@ import { Direction } from './rect';
 */
 
 export const Levels: string[] = [
-    '05az0202bv0404',
+    '03dz0304dz0504dz0604az0204bw0704bw0804bw0904fw0404',
+    '04az0204bw0604bw0704bw0804bw0904',
+    '03az0303bw0505bw0605bw0705',
+    '03aw0303bw0504bw0503bw0505',
+    '02cw0503az0303bw0704bw0703',
+    '01az0303bw0505',
+    '04aw0403bw0604bw0603',
 ];
 
 const dirMap = {
@@ -32,12 +38,20 @@ const oprMap = {
     a: OperatorType.Spawner,
     b: OperatorType.End,
     c: OperatorType.Block,
+    d: OperatorType.Belt,
+    e: OperatorType.Piston,
+    f: OperatorType.Freezer,
+    g: OperatorType.Thawer,
 };
 
 const oprRevMap = {
     [OperatorType.Spawner]: 'a',
     [OperatorType.End]: 'b',
     [OperatorType.Block]: 'c',
+    [OperatorType.Belt]: 'd',
+    [OperatorType.Piston]: 'e',
+    [OperatorType.Freezer]: 'f',
+    [OperatorType.Thawer]: 'g',
 };
 
 type Level = {
