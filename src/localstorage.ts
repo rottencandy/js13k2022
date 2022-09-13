@@ -30,3 +30,7 @@ export const getLevelStats = (id: number) => {
         return [];
     }
 };
+
+export const isFirstVisit = () => {
+    return !localStorage.getItem(KEY);
+}

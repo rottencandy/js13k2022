@@ -68,6 +68,38 @@ html, body {
     overflow-x: hidden;
 }
 
+#blurscrn.instr {
+    backdrop-filter: blur(3px);
+}
+.instrbox {
+    position: absolute;
+    background: #ccc7;
+    display: flex;
+    align-items: flex-end;
+    border-radius: 5px;
+    border: 5px solid #ccc;
+    color: #300;
+    font-size: 1.5vw;
+}
+.instrbox.box1 {
+    left: 2vw;
+    top: 3vh;
+    width: 20%;
+    height: 20%;
+}
+.instrbox.box2 {
+    left: 2vw;
+    top: 25vh;
+    width: 25%;
+    height: 50%;
+}
+.instrbox.box3 {
+    left: 30vw;
+    top: 5vh;
+    width: 50%;
+    height: 70%;
+}
+
 /* Note for potrait devices */
 #d {
     position: absolute;
@@ -160,6 +192,20 @@ input.num {
     padding: 1vw;
     font-size: 3vh;
     border-radius: 5px;
+}
+
+.letter {
+    height: 60vh;
+    width: 35vw;
+    font-size: 1.5vw;
+    padding: 7vh 5vw;
+    text-align: left;
+    font-family: Times New Roman, serif;
+    backface-visibility: hidden;
+    z-index: 2;
+    background: #ccc;
+    box-shadow: inset rgba(0,0,0,.3) 0px 0px 100px, rgba(0,0,0,.4) 0px -4px 10px;
+    transform: translate(20vw, 10vh) rotate3d(1, 1, 1, 5deg);
 }
 
 /* Anim */

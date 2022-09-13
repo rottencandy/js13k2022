@@ -3,7 +3,7 @@ import { pauseGame, startGame } from './game';
 import { E } from './globals';
 import { encodeLevel, Levels } from './levels';
 import { loadCustomLevel, loadEditor, loadLevel } from './scene';
-import { getLevelStats } from './localstorage';
+import { getLevelStats, isFirstVisit } from './localstorage';
 
 const root = document.getElementById('ui') as HTMLDivElement;
 
@@ -164,6 +164,51 @@ const showCustomScrn = () => {
     //setTimeout(() => fadeInEle(scrn), 10);
 };
 
+const showInstructions = () => {
+    appendRoot(
+        E('div', { id: 'blurscrn', className: 'instr', onclick: showGameHUD },
+            E('div', { className: 'instrbox box1', }, '❷ start/stop machines'),
+            E('div', { className: 'instrbox box2', }, '❶ select machines'),
+            E('div', { className: 'instrbox box3', }, '❸ place machines & move frozen bodies to cryochambers'),
+        ),
+    );
+};
+
+const showStartLetter = () => {
+    appendRoot(
+        E('div', { id: 'blurscrn', onclick: showInstructions },
+            E('div', { className: 'letter', },
+                'From: Management',
+                E('br'),
+                E('br'),
+                'To: EMPLOYEE_130847',
+                E('br'),
+                E('br'),
+                'Welcome to your first day at Cryonics Inc.™',
+                E('br'),
+                E('br'),
+                `Your job is to ensure that all bodies are frozen & stored in cryochambers,
+                so that they could one day be resurrected and be immortal.
+                But don\'t worry too much about it, they\'re already ', `, E('s', {}, 'dead'), ' vitrified.',
+                E('br'),
+                E('br'),
+                'Have fun in your new role!',
+                E('br'),
+                E('br'),
+                ' (CLICK TO CONTINUE) ',
+            ),
+        ),
+    );
+};
+
+const handleGameStart = () => {
+    if (isFirstVisit()) {
+        showStartLetter();
+    } else {
+        showGameHUD();
+    }
+};
+
 const showLevelScrn = () => {
     const scrn = E('div', { id: 'bgscrn' },
         E('div', { className: 'btn cstm', onclick: showCustomScrn, }, 'CUSTOM LEVELS'),
@@ -176,7 +221,7 @@ const showLevelScrn = () => {
                     onclick: () => {
                         resetOperatorStates();
                         loadLevel(i);
-                        showGameHUD();
+                        handleGameStart();
                     },
                 },
                     i + 1 + '',
