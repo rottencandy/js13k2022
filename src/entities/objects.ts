@@ -35,7 +35,7 @@ let ObjGroups: ObjGroup[] = [];
 let objCtx = null;
 let frzObjCtx = null;
 setTimeout(() => {
-    objCtx = createRectTex(makeTextTex('😔', 120));
+    objCtx = createRectTex(makeTextTex('😴', 120));
     frzObjCtx = createRectTex(makeTextTex('🥶', 120));
 }, 100);
 

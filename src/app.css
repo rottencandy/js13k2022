@@ -7,8 +7,8 @@ html, body {
     padding: 0;
     margin: 0;
     background: #111;
-    font: 100 2.5rem Trebuchet,sans-serif;
-    color: #aaa;
+    font: 100 2rem Trebuchet,sans-serif;
+    color: #333;
     text-align: center;
 }
 
@@ -47,12 +47,23 @@ html, body {
     flex-direction: column;
 }
 
+#bgscrn {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    transition: background 1s;
+    background: blue;
+    overflow-x: hidden;
+    background: linear-gradient(45deg, rgba(21,0,36,1) 0%, rgba(0,255,151,1) 100%);
+}
+
 #blurscrn {
     height: 100vh;
     width: 100vw;
     display: flex;
     flex-direction: column;
-    transition: opacity 1s;
+    transition: opacity 0.5s;
     backdrop-filter: blur(10px);
     overflow-x: hidden;
 }
@@ -69,32 +80,60 @@ html, body {
 .title {
     margin: 10vh auto;
 }
+.subtitle {
+    margin: 7vh auto;
+}
 
 .btn {
     cursor: pointer;
-    background: #777;
-    margin: auto;
+    background: #aaa;
+    border: 2px solid #aaa;
+    margin: 1vw auto;
     padding: 1vw;
     font-size: 3vh;
+    border-radius: 5px;
+    transition: all 0.2s;
 }
 .btn:hover {
-    background: #999;
+    background-image: linear-gradient(45deg, #5b88a6 0%, #4b7896 100%);
+    border: 3px solid #333;
+    transform: scale(1.05);
+
 }
 .btn.pause {
-    transition: opacity 1s;
     width: 3vw;
-    margin-left: 0;
+    margin-left: 1vw;
 }
 .btn.level {
     padding: 6vw;
 }
+.btn.start {
+    margin: 20vw auto;
+}
+.btn.back {
+    margin-left: 7vw;
+}
+.btn.cstm {
+    margin-right: 7vw;
+}
+.btn.visited {
+    background: #788;
+}
+.btn .stats {
+    font-size: 2vh;
+}
 
 input {
-    font: inherit;
+    font-size: 1vw;
     background: #ccc;
     padding: 0;
     border: 0;
+    margin: auto;
     border-bottom: 2px solid #222;
+    max-width: 85vw;
+}
+input.num {
+    max-width: 35vw;
 }
 
 .levels {
@@ -107,6 +146,20 @@ input {
     .levels {
         grid-template-columns: repeat(3, 1fr);
     }
+}
+
+#status {
+    pointer-events: none;
+    position: absolute;
+    backdrop-filter: blur(7px);
+    color: #ccc;
+    border: 4px solid #aaa;
+    width: 17vw;
+    top: 75vh;
+    left: 1vw;
+    padding: 1vw;
+    font-size: 3vh;
+    border-radius: 5px;
 }
 
 /* Anim */

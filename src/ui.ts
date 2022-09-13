@@ -3,9 +3,9 @@ import { pauseGame, startGame } from './game';
 import { E } from './globals';
 import { encodeLevel, Levels } from './levels';
 import { loadCustomLevel, loadEditor, loadLevel } from './scene';
+import { getLevelStats } from './localstorage';
 
 const root = document.getElementById('ui') as HTMLDivElement;
-const transition = (func: Function) => setTimeout(func, 750);
 
 const appendRoot = (...stuff: (string | Node)[]) => {
     root.innerHTML = '';
@@ -14,41 +14,73 @@ const appendRoot = (...stuff: (string | Node)[]) => {
 };
 const hideRoot = () => root.style.display = 'none';
 
-export const fadeOutEle = (blurEle: HTMLElement) => blurEle.style.opacity = '0';
-export const fadeInEle = (blurEle: HTMLElement) => blurEle.style.opacity = '1';
+const fadeOutEle = (blurEle: HTMLElement) => blurEle.style.opacity = '0';
+const fadeInEle = (blurEle: HTMLElement) => blurEle.style.opacity = '1';
 
 
 const showGameHUD = () => {
-    fadeOutEle(document.getElementById('blurscrn'));
-    transition(() => {
-        hideRoot();
-        const pauseBtn = E('div', { className: 'btn pause', onclick: showPauseScrn }, 'II');
-        appendRoot(
-            pauseBtn
-        );
-        fadeInEle(pauseBtn);
-        startGame();
-    });
+    //fadeOutEle(document.getElementById('blurscrn'));
+    hideRoot();
+    const pauseBtn = E('div', { className: 'btn pause', onclick: showPauseScrn }, 'II');
+    appendRoot(
+        pauseBtn,
+        E('div', { id: 'status', onclick: showLevelScrn, },
+            E('span', { id: 'timestat', className: 'stats' }, '🕐 -'),
+            E('br'),
+            E('span', { id: 'nrgstat', className: 'stats' }, '⚡ -'),
+            E('br'),
+            E('span', { id: 'facestat', className: 'stats' }, '😴 -'),
+        ),
+    );
+    fadeInEle(pauseBtn);
+    startGame();
+};
+
+export const updateHUDTime = (time: number) => {
+    setTimeout(() => {
+        const container = document.getElementById('timestat');
+        if (container) {
+            container.innerHTML = `🕐 ${time ?? '-'}`;
+        }
+    }, 50);
+};
+
+export const updateHUDEnergy = (nrg: number) => {
+    setTimeout(() => {
+        const container = document.getElementById('nrgstat');
+        if (container) {
+            container.innerHTML = `⚡ ${nrg ?? '-'}`;
+        }
+    }, 50);
+};
+
+export const updateHUDFace = (face: number) => {
+    setTimeout(() => {
+        const container = document.getElementById('facestat');
+        if (container) {
+            container.innerHTML = `😴 ${face ?? '-'}`;
+        }
+    }, 50);
 };
 
 export const showTitleScrn = () => {
-    const scrn = E('div', { id: 'blurscrn' },
-        E('div', { className: 'title' }, 'UNTITLED'),
-        E('div', { className: 'btn', onclick: showLevelScrn, }, 'START'),
+    const scrn = E('div', { id: 'bgscrn' },
+        E('div', { className: 'title' }, 'CRYONICS INC'),
+        E('div', { className: 'btn start', onclick: showLevelScrn, }, 'START'),
     );
     appendRoot(
         scrn
     );
-    fadeInEle(scrn);
+    //fadeInEle(scrn);
 };
 
 const showLevelCreatedScrn = () => {
     pauseGame();
-    const input = E('input', { type: 'number', value: 1 });
+    const input = E('input', { type: 'number', value: 1, className: 'num' });
 
-    const scrn = E('div', { id: 'blurscrn' },
-        E('div', { className: 'title' }, '😔 COUNT'),
-        E('div', { className: 'btn', onclick: showLevelScrn, }, '↼'),
+    const scrn = E('div', { id: 'bgscrn' },
+        E('div', { className: 'btn back', onclick: showLevelScrn, }, '↼'),
+        E('div', {}, 'ENTER UNIT COUNT'),
         input,
         E('div', {
             className: 'btn', onclick: () => {
@@ -56,10 +88,17 @@ const showLevelCreatedScrn = () => {
                 const lv = encodeLevel({ operators: getAllOperators(), spawnCount: input.value });
                 const lvInput = E('input', { readOnly: true, value: lv });
                 appendRoot(
-                    E('div', { className: 'btn', onclick: showLevelScrn, }, '↼'),
-                    E('div', { className: 'title' }, 'CREATED'),
-                    lvInput,
-                );
+                    E('div', { id: 'bgscrn' },
+                        E('div', { className: 'btn back', onclick: showLevelScrn, }, '↼'),
+                        E('div', { className: 'subtitle' }, 'LEVEL CREATED'),
+                        lvInput,
+                        E('a', {
+                            className: 'btn',
+                            target: '_blank',
+                            // @ts-ignore
+                            href: `https://twitter.com/intent/tweet?url=https://js13kgames.com/entries/cryonics-inc&text=Checkout this custom Cryonics Inc level: ${lvInput.value}`
+                        }, 'SHARE 🐦'),
+                    ));
 
                 // give it some time to attach to DOM
                 setTimeout(() => {
@@ -74,14 +113,16 @@ const showLevelCreatedScrn = () => {
         scrn
     );
     fadeOutEle(scrn);
+    // give it some time to attach to DOM
+    setTimeout(() => input.focus(), 50);
     setTimeout(() => fadeInEle(scrn), 10);
 };
 
 const showLevelInputScrn = () => {
     const input = E('input');
-    const scrn = E('div', { id: 'blurscrn' },
-        E('div', { className: 'title' }, 'ENTER LEVEL DATA'),
-        E('div', { className: 'btn', onclick: showLevelScrn, }, '↼'),
+    const scrn = E('div', { id: 'bgscrn' },
+        E('div', { className: 'btn back', onclick: showLevelScrn, }, '↼'),
+        E('div', { className: 'subtitle' }, 'ENTER LEVEL DATA'),
         input,
         E('div', {
             className: 'btn', onclick: () => {
@@ -94,74 +135,79 @@ const showLevelInputScrn = () => {
     appendRoot(
         scrn
     );
-    fadeOutEle(scrn);
-    setTimeout(() => fadeInEle(scrn), 10);
+    //fadeOutEle(scrn);
+    //setTimeout(() => fadeInEle(scrn), 10);
 };
 
 const showLevelEditorHUD = () => {
-    fadeOutEle(document.getElementById('blurscrn'));
-    transition(() => {
-        hideRoot();
-        appendRoot(
-            E('div', { className: 'btn pause', onclick: showPauseScrn }, 'II'),
-            E('div', { className: 'btn pause', onclick: showLevelCreatedScrn }, '✅'),
-        );
-        loadEditor();
-        startGame();
-    });
+    fadeOutEle(document.getElementById('bgscrn'));
+    hideRoot();
+    appendRoot(
+        E('div', { className: 'btn pause', onclick: showPauseScrn }, 'II'),
+        E('div', { className: 'btn pause', onclick: showLevelCreatedScrn }, '✅'),
+    );
+    loadEditor();
+    startGame();
 };
 
 const showCustomScrn = () => {
-    const scrn = E('div', { id: 'blurscrn' },
-        E('div', { className: 'title' }, 'CUSTOM LEVELS'),
-        E('div', { className: 'btn', onclick: showLevelScrn, }, '↼'),
+    const scrn = E('div', { id: 'bgscrn' },
+        E('div', { className: 'btn back', onclick: showLevelScrn, }, '↼'),
+        E('div', { className: 'subtitle' }, 'CUSTOM LEVELS'),
         E('div', { className: 'btn', onclick: showLevelEditorHUD, }, 'LEVEL EDITOR'),
         E('div', { className: 'btn', onclick: showLevelInputScrn, }, 'PLAY LEVEL'),
     );
     appendRoot(
         scrn
     );
-    fadeOutEle(scrn);
-    setTimeout(() => fadeInEle(scrn), 10);
+    //fadeOutEle(scrn);
+    //setTimeout(() => fadeInEle(scrn), 10);
 };
 
 const showLevelScrn = () => {
-    const scrn = E('div', { id: 'blurscrn' },
-        E('div', { className: 'title' }, 'LEVELS'),
-        E('div', { className: 'btn', onclick: showCustomScrn, }, 'CUSTOM LEVELS'),
-        E('div', { className: 'levels', onclick: showGameHUD, },
-            ...Levels.map((_, i) =>
-                E('div', {
-                    className: 'level btn',
+    const scrn = E('div', { id: 'bgscrn' },
+        E('div', { className: 'btn cstm', onclick: showCustomScrn, }, 'CUSTOM LEVELS'),
+        E('div', { className: 'subtitle' }, 'LEVELS'),
+        E('div', { className: 'levels', },
+            ...Levels.map((_, i) => {
+                const [energy, time] = getLevelStats(i);
+                return E('div', {
+                    className: 'level btn ' + (energy && time ? 'visited' : ''),
                     onclick: () => {
                         resetOperatorStates();
                         loadLevel(i);
                         showGameHUD();
                     },
                 },
-                    i + 1 + ''))),
+                    i + 1 + '',
+                    E('br'),
+                    E('span', { className: 'stats' }, `🕐 ${time ?? '-'}`),
+                    E('br'),
+                    E('span', { className: 'stats' }, `⚡ ${energy ?? '-'}`),
+                )
+            })),
     );
     appendRoot(
         scrn
     );
-    fadeOutEle(scrn);
-    setTimeout(() => fadeInEle(scrn), 10);
+    //fadeOutEle(scrn);
+    //setTimeout(() => fadeInEle(scrn), 10);
 };
 
 export const showLevelEndScrn = () => {
     pauseGame();
-    const scrn = E('div', { id: 'blurscrn' },
-        E('div', { className: 'title' }, 'LEVEL COMPLETE!'),
-        E('div', { className: 'btn', onclick: showLevelScrn, }, 'LEVELS'),
+    const scrn = E('div', { id: 'bgscrn' },
+        E('div', { className: 'subtitle' }, 'LEVEL COMPLETE!'),
+        E('div', { className: 'btn', onclick: showLevelScrn, }, 'NEXT'),
     );
     appendRoot(
         scrn
     );
-    fadeOutEle(scrn);
-    setTimeout(() => fadeInEle(scrn), 10);
+    //fadeOutEle(scrn);
+    //setTimeout(() => fadeInEle(scrn), 10);
 };
 
-export const showPauseScrn = () => {
+const showPauseScrn = () => {
     pauseGame();
     const scrn = E('div', { id: 'blurscrn' },
         E('div', { className: 'title' }, 'PAUSED'),

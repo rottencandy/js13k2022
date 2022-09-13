@@ -3,6 +3,7 @@ import { CursorGridPos } from '../globals';
 import { createRectTex, Direction, nextDir } from '../rect';
 import { SceneState } from '../scene';
 import { makeTextTex } from '../text';
+import { updateHUDEnergy } from '../ui';
 import { isCellEmpty, spawnThawedObject } from './objects';
 import { canCollidePiston, pistonArmPos, pistonIntent } from './piston';
 
@@ -41,9 +42,12 @@ const State = {
     showCellEditBtns: false,
     lastEditPos: { x: -5, y: -5 },
     gridCheckType: null,
+    opCount: 0,
 };
 
 // Utils {{{
+
+export const getOpCount = () => State.opCount;
 
 export const isObstaclePresent = (x: number, y: number) => {
     return SpawnerOps.some(o => o.x === x && o.y === y) ||
@@ -118,6 +122,7 @@ export const loadOperators = (operators: Operator[], isEditor?: boolean) => {
         OperatorType.Belt;
         State.gridCheckType = checkGridLevelUpdates;
     };
+    updateHUDEnergy(State.opCount = 0);
 };
 
 export const getAllOperators = () => [
@@ -169,6 +174,7 @@ const checkHoverWithBtns = (oprs: Operator[]) => {
                     o.dir = nextDir(o.dir);
                 } else {
                     oprs.splice(i, 1);
+                    updateHUDEnergy(--State.opCount);
                 }
             }
             State.showHoverOpShadow = false;
@@ -200,6 +206,7 @@ const checkGridLevelUpdates = () => {
             checkHoverWithBtns(ThawOps) ||
             (State.showCellEditBtns = false);
         if (Keys.justClicked_ && State.showHoverOpShadow) {
+            updateHUDEnergy(++State.opCount);
             spawnOperator(
                 CursorGridPos.x,
                 CursorGridPos.y,

@@ -39,6 +39,7 @@ const state = {
     },
     panelOprList: {},
     selectedOpr: null,
+    isEditor: false,
 };
 // todo: lerped hover size
 const BTN_HOVER_SIZE = 1.2;
@@ -79,6 +80,7 @@ export const readStateBtns = (prevState: SceneState) => {
 export const setupPanel = (isEditor?: boolean) => {
     state.panelOprList = isEditor ? editPanelOprCtx : playPanelOprCtx;
     state.selectedOpr = Object.keys(state.panelOprList)[0];
+    state.isEditor = isEditor;
 };
 
 export const readOprBtns = () => {
@@ -95,12 +97,14 @@ export const readOprBtns = () => {
 
 export const render = () => {
     bg.use_().draw_(-4, -0.1, .1);
-    if (state.paused) {
-        playBtn.use_().draw_(-2.9, 6.5, .11, state.scale.btn1);
-    } else {
-        pauseBtn.use_().draw_(-2.9, 6.5, .11, state.scale.btn1);
+    if (!state.isEditor) {
+        if (state.paused) {
+            playBtn.use_().draw_(-2.9, 6.5, .11, state.scale.btn1);
+        } else {
+            pauseBtn.use_().draw_(-2.9, 6.5, .11, state.scale.btn1);
+        }
+        stopBtn.use_().draw_(-1.9, 6.5, .11, state.scale.btn2);
     }
-    stopBtn.use_().draw_(-1.9, 6.5, .11, state.scale.btn2);
 
     const opacity = state.paused ? 1 : .7;
     Object.keys(state.panelOprList).map((o, i) => {
