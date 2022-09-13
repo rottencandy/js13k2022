@@ -37,7 +37,7 @@ export const resetScene = () => {
     State.completedObjs = 0;
 }
 
-const waitTicker = ticker(900);
+const waitTicker = ticker(300);
 const stepTween = createTween(0, 1, 900);
 const stepState = createStateMachine({
     [StepState.Idle]: (dt) => {
@@ -140,8 +140,8 @@ export const update = (dt: number) => {
     sceneState.run(dt);
 };
 
-export const render = () => {
-    bgRender();
+export const render = (t: number) => {
+    bgRender(t);
     panelRender();
     operatorsRender(sceneState.state as SceneState, stepTween.val);
     objectsRender(stepTween.val);

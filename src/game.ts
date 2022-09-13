@@ -23,9 +23,9 @@ export const update = (dt: number) => {
     sm.run(dt);
 };
 
-export const render = () => {
+export const render = (t: number) => {
     CTX.clear_();
-    sceneRender();
+    sceneRender(t);
 };
 
 export const startGame = () => sm.reset(State.Playing);

@@ -81,6 +81,7 @@ export const createShadedRect = (frag: string, width = 1, height = width) => {
             sh.use_();
             return thisObj;
         },
+        uni,
         draw_(x: number, y: number, z: number) {
             uni`uPos`.u3f_(x, y, z);
             mesh.draw_();

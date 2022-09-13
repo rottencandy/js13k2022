@@ -189,7 +189,7 @@ const showStartLetter = () => {
                 E('br'),
                 `Your job is to ensure that all bodies are frozen & stored in cryochambers,
                 so that they could one day be resurrected and be immortal.
-                But don\'t worry too much about it, they\'re already ', `, E('s', {}, 'dead'), ' vitrified.',
+                But don\'t worry too much about it, they\'re already `, E('s', {}, 'dead'), ' vitrified.',
                 E('br'),
                 E('br'),
                 'Have fun in your new role!',

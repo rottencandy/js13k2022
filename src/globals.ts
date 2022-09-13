@@ -2,8 +2,8 @@ import { createGLContext } from './engine/webgl2';
 import Camera from './engine/cam';
 import { Keys } from './engine/input';
 
-export const GAME_WIDTH = 640;
-export const GAME_HEIGHT = 360;
+export const GAME_WIDTH = 1920;
+export const GAME_HEIGHT = 1080;
 export const GRID_WIDTH = 11;
 export const GRID_HEIGHT = 8;
 
@@ -27,7 +27,7 @@ export const
 export const CTX = createGLContext(document.getElementById('c') as HTMLCanvasElement, GAME_WIDTH, GAME_HEIGHT);
 (window.onresize = CTX.resize_)();
 
-export const CAM = Camera(radians(45), 1, 400, 640 / 360).move_(-4, 4, -10).recalculate_();
+export const CAM = Camera(radians(45), 1, 400, GAME_WIDTH / GAME_HEIGHT).move_(-4, 4, -10).recalculate_();
 
 
 export const CursorGridPos = {
