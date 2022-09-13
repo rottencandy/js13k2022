@@ -271,6 +271,7 @@ export const resetOperatorStates = () => {
 let beltCtx = null;
 let blockCtx = null;
 let spawnerCtx = null;
+let spawnerDirCtx = null;
 let freezerCtx = null;
 let thawCtx = null;
 let endCtx = null;
@@ -285,6 +286,7 @@ setTimeout(() => {
     beltCtx = createRectTex(makeTextTex('⟰', 100));
     blockCtx = createRectTex(makeTextTex('🛑', 100));
     spawnerCtx = createRectTex(makeTextTex('🔳', 100));
+    spawnerDirCtx = createRectTex(makeTextTex('↥', 220));
     freezerCtx = createRectTex(makeTextTex('🔷', 100));
     thawCtx = createRectTex(makeTextTex('◇', 100));
     endCtx = createRectTex(makeTextTex('🔘', 100));
@@ -327,7 +329,8 @@ const drawBlock = (o: Operator) => {
 
 const drawSpawner = (o: Operator) => {
     checkEditBtnPos(o.x, o.y);
-    spawnerCtx.draw_(o.x, o.y, -0.02, 1, 1, o.dir);
+    spawnerCtx.use_().draw_(o.x, o.y, -0.02, 1, 1, o.dir);
+    spawnerDirCtx.use_().draw_(o.x, o.y, -0.02, 1, 1, o.dir);
 };
 
 const drawFreezer = (o: Operator) => {
@@ -367,7 +370,6 @@ const drawPistonArm = (p: Operator, tweenVal: number) => {
 export const render = (state: SceneState, tweenDur: number) => {
     beltCtx.use_();
     BeltOps.map(drawBelt);
-    spawnerCtx.use_();
     SpawnerOps.map(drawSpawner);
     freezerCtx.use_();
     FreezerOps.map(drawFreezer);
