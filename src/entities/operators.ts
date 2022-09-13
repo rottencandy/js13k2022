@@ -282,18 +282,18 @@ export const operatorTypeCtx: { [key: number]: any } = {};
 export const playPanelOprCtx: { [key: number]: any } = {};
 export const editPanelOprCtx: { [key: number]: any } = {};
 setTimeout(() => {
-    beltCtx = createRectTex(makeTextTex('⏫', 100));
-    blockCtx = createRectTex(makeTextTex('⬛', 100));
+    beltCtx = createRectTex(makeTextTex('⟰', 100));
+    blockCtx = createRectTex(makeTextTex('🛑', 100));
     spawnerCtx = createRectTex(makeTextTex('🔳', 100));
-    freezerCtx = createRectTex(makeTextTex('🆒', 100));
-    thawCtx = createRectTex(makeTextTex('📛', 100));
-    endCtx = createRectTex(makeTextTex('🔲', 100));
+    freezerCtx = createRectTex(makeTextTex('🔷', 100));
+    thawCtx = createRectTex(makeTextTex('◇', 100));
+    endCtx = createRectTex(makeTextTex('🔘', 100));
 
-    rotateCtx = createRectTex(makeTextTex('↻', 170));
-    crossCtx = createRectTex(makeTextTex('×', 170));
+    rotateCtx = createRectTex(makeTextTex('🔃', 220));
+    crossCtx = createRectTex(makeTextTex('❎', 220));
 
-    pistonBaseCtx = createRectTex(makeTextTex('🔝', 100));
-    pistonArmCtx = createRectTex(makeTextTex('T', 100));
+    pistonBaseCtx = createRectTex(makeTextTex('⬆', 100));
+    pistonArmCtx = createRectTex(makeTextTex('▐', 100));
 
     operatorTypeCtx[OperatorType.Belt] = beltCtx;
     operatorTypeCtx[OperatorType.Piston] = pistonBaseCtx;
@@ -388,8 +388,8 @@ export const render = (state: SceneState, tweenDur: number) => {
                 .draw_(CursorGridPos.x, CursorGridPos.y, -0.02, 1, .7);
         }
         if (State.showCellEditBtns) {
-            rotateCtx.use_().draw_(State.lastEditPos.x - 0.2, State.lastEditPos.y - 0.1, -0.01);
-            crossCtx.use_().draw_(State.lastEditPos.x + 0.2, State.lastEditPos.y - 0.2, -0.01);
+            rotateCtx.use_().draw_(State.lastEditPos.x - 0.2, State.lastEditPos.y - 0.1, -0.01, 0.9);
+            crossCtx.use_().draw_(State.lastEditPos.x + 0.2, State.lastEditPos.y - 0.1, -0.01, 0.9);
         }
     }
 };

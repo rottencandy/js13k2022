@@ -56,11 +56,12 @@ export const createRectTex = (tex: any) => {
             sh.use_();
             return thisObj;
         },
-        draw_(x: number, y: number, z: number, size = 1, opacity = 1, angle = Direction.Top) {
+        draw_(x: number, y: number, z: number, size = 1, opacity = 1, angle = Direction.Top, brightness = 1) {
             uni`uPos`.u3f_(x, y, z);
             uni`uZoom`.u1f_(size);
             uni`uOpacity`.u1f_(opacity);
             uni`uAng`.u1f_(angle);
+            uni`uBri`.u1f_(brightness);
             mesh.draw_();
             return thisObj;
         },

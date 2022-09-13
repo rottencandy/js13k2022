@@ -53,7 +53,6 @@ html, body {
     display: flex;
     flex-direction: column;
     transition: background 1s;
-    background: blue;
     overflow-x: hidden;
     background: linear-gradient(45deg, rgba(21,0,36,1) 0%, rgba(0,255,151,1) 100%);
 }
@@ -110,10 +109,10 @@ html, body {
 
 /* Runtime created elements */
 .title {
-    margin: 10vh auto;
+    margin: 7vh auto;
 }
 .subtitle {
-    margin: 7vh auto;
+    margin: 6vh auto;
 }
 
 .btn {
@@ -140,7 +139,7 @@ html, body {
     padding: 6vw;
 }
 .btn.start {
-    margin: 20vw auto;
+    margin: 10vw auto;
 }
 .btn.back {
     margin-left: 7vw;

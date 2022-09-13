@@ -11,10 +11,10 @@ let playBtn = null;
 let pauseBtn = null;
 let stopBtn = null;
 setTimeout(() => {
-    selectorCtx = createRectTex(makeTextTex('⛶', 100));
-    playBtn = createRectTex(makeTextTex('▶', 100));
-    pauseBtn = createRectTex(makeTextTex('⏸', 100));
-    stopBtn = createRectTex(makeTextTex('⏹', 100));
+    selectorCtx = createRectTex(makeTextTex('⛶', 105));
+    playBtn = createRectTex(makeTextTex('▶', 130));
+    pauseBtn = createRectTex(makeTextTex('⏸', 130));
+    stopBtn = createRectTex(makeTextTex('🔁', 130));
 
     state.selectedOpr = Object.keys(state.panelOprList)[0];
 }, 100);
@@ -110,7 +110,7 @@ export const render = () => {
     Object.keys(state.panelOprList).map((o, i) => {
         state.panelOprList[o].use_().draw_(-2.3, 5 - i, .11, state.scale[o], opacity);
         if (state.scene === SceneState.Editing && state.selectedOpr === o) {
-            selectorCtx.use_().draw_(-2.3, 5 - i, .11, 1.1);
+            selectorCtx.use_().draw_(-2.3, 5 - i, .11, 1.1, 1, 0, 0);
         }
     });
 };

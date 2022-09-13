@@ -26,7 +26,7 @@ float noise(vec2 p){
 
 // https://thebookofshaders.com/edit.php#11/2d-gnoise.frag
 vec3 fog() {
-    vec2 pos = vUV * 10. + vec2(uTime * .01, uTime * .001);
+    vec2 pos = vUV * 10. + vec2(uTime * .005, uTime * .001);
     return vec3(noise(pos)*.5 + .5);
 }
 

@@ -65,7 +65,7 @@ export const updateHUDFace = (face: number) => {
 
 export const showTitleScrn = () => {
     const scrn = E('div', { id: 'bgscrn' },
-        E('div', { className: 'title' }, 'CRYONICS INC'),
+        E('div', { className: 'title' }, 'CRYONICS INC.'),
         E('div', { className: 'btn start', onclick: showLevelScrn, }, 'START'),
     );
     appendRoot(
@@ -188,8 +188,8 @@ const showStartLetter = () => {
                 E('br'),
                 E('br'),
                 `Your job is to ensure that all bodies are frozen & stored in cryochambers,
-                so that they could one day be resurrected and be immortal.
-                But don\'t worry too much about it, they\'re already `, E('s', {}, 'dead'), ' vitrified.',
+                so that people could one day be resurrected and be immortal.
+                They\'re already vitrified, and we help them cheat death.`,
                 E('br'),
                 E('br'),
                 'Have fun in your new role!',
