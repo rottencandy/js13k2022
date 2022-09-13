@@ -20,13 +20,13 @@ setTimeout(() => {
 }, 100);
 
 const oprMap = {
-        [OperatorType.Belt]: OperatorType.Belt,
-        [OperatorType.Block]: OperatorType.Block,
-        [OperatorType.Piston]: OperatorType.Piston,
-        [OperatorType.Freezer]: OperatorType.Freezer,
-        [OperatorType.Thawer]: OperatorType.Thawer,
-        [OperatorType.End]: OperatorType.End,
-        [OperatorType.Spawner]: OperatorType.Spawner,
+    [OperatorType.Belt]: OperatorType.Belt,
+    [OperatorType.Block]: OperatorType.Block,
+    [OperatorType.Piston]: OperatorType.Piston,
+    [OperatorType.Freezer]: OperatorType.Freezer,
+    [OperatorType.Thawer]: OperatorType.Thawer,
+    [OperatorType.End]: OperatorType.End,
+    [OperatorType.Spawner]: OperatorType.Spawner,
 };
 
 const state = {
@@ -62,6 +62,7 @@ export const readStateBtns = (prevState: SceneState) => {
     if (isPtrInBounds(btn1Pos.x, btn1Pos.y, btnWidth, btnHeight)) {
         state.scale.btn1 = BTN_HOVER_SIZE;
         if (Keys.justClicked_) {
+            // hint: there's an assignment here
             if (state.paused = !state.paused) return state.scene = SceneState.Paused;
             else return state.scene = SceneState.Running;
         }
@@ -101,8 +102,9 @@ export const render = () => {
     }
     stopBtn.use_().draw_(-1.9, 6.5, .11, state.scale.btn2);
 
+    const opacity = state.paused ? 1 : .7;
     Object.keys(state.panelOprList).map((o, i) => {
-        state.panelOprList[o].use_().draw_(-2.3, 5 - i, .11, state.scale[o]);
+        state.panelOprList[o].use_().draw_(-2.3, 5 - i, .11, state.scale[o], opacity);
         if (state.scene === SceneState.Editing && state.selectedOpr === o) {
             selectorCtx.use_().draw_(-2.3, 5 - i, .11, 1.1);
         }
