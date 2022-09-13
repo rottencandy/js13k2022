@@ -103,12 +103,16 @@ export const loadLevel = (id: number) => {
 
 export const loadCustomLevel = (lv: string) => {
     setupPanel();
-    const ops = parseLevel(lv);
-    State.remainingSpawns = ops.spawnCount;
-    State.curLevelSpawns = ops.spawnCount;
-    State.completedObjs = 0;
-    loadOperators(ops.operators);
-    sceneState.reset(SceneState.Editing);
+    try {
+        const ops = parseLevel(lv);
+        State.remainingSpawns = ops.spawnCount;
+        State.curLevelSpawns = ops.spawnCount;
+        State.completedObjs = 0;
+        loadOperators(ops.operators);
+        sceneState.reset(SceneState.Editing);
+    } catch (e) {
+        alert('Invalid Level: ' + e);
+    }
 };
 
 export const update = (dt: number) => {

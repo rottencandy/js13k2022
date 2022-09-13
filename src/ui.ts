@@ -2,7 +2,7 @@ import { getAllOperators, resetOperatorStates } from './entities/operators';
 import { pauseGame, startGame } from './game';
 import { E } from './globals';
 import { encodeLevel, Levels } from './levels';
-import { loadEditor, loadLevel } from './scene';
+import { loadCustomLevel, loadEditor, loadLevel } from './scene';
 
 const root = document.getElementById('ui') as HTMLDivElement;
 const transition = (func: Function) => setTimeout(func, 750);
@@ -83,7 +83,13 @@ const showLevelInputScrn = () => {
         E('div', { className: 'title' }, 'ENTER LEVEL DATA'),
         E('div', { className: 'btn', onclick: showLevelScrn, }, '↼'),
         input,
-        E('div', { className: 'btn', onclick: showLevelScrn, }, 'START'),
+        E('div', {
+            className: 'btn', onclick: () => {
+                // @ts-ignore
+                loadCustomLevel(input.value);
+                startGame();
+            },
+        }, 'START'),
     );
     appendRoot(
         scrn
